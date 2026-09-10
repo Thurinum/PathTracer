@@ -6,6 +6,11 @@
         <Nullable>enable</Nullable>
         <OutputType>Exe</OutputType>
         <RootNamespace>PathTracerApp</RootNamespace>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
     </PropertyGroup>
 
     <ItemGroup>
@@ -16,6 +21,14 @@
       <PackageReference Include="NeoVeldrid.ImGui" Version="1.2.1" />
       <PackageReference Include="NeoVeldrid.SPIRV" Version="1.2.1" />
       <PackageReference Include="NeoVeldrid.StartupUtilities" Version="1.2.1" />
+      <PackageReference Include="Silk.NET.Shaderc" Version="2.23.0" />
+      <PackageReference Include="Silk.NET.Shaderc.Native" Version="2.23.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Resources/**/*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
 </Project>
