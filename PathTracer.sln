@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathTracer.Core", "PathTracer.Core\PathTracer.Core.csproj", "{62191226-6E8D-4DD0-8BB0-06C489FCE1FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathTracer.App", "PathTracer.App\PathTracer.App.csproj", "{FF319E9D-1C77-46F0-A006-1EC3EA88EE55}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathTracer.Core.Tests", "PathTracer.Core.Tests\PathTracer.Core.Tests.csproj", "{A70D99FC-A89B-4486-A35C-204ED60262F1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{62191226-6E8D-4DD0-8BB0-06C489FCE1FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62191226-6E8D-4DD0-8BB0-06C489FCE1FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62191226-6E8D-4DD0-8BB0-06C489FCE1FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62191226-6E8D-4DD0-8BB0-06C489FCE1FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF319E9D-1C77-46F0-A006-1EC3EA88EE55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF319E9D-1C77-46F0-A006-1EC3EA88EE55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF319E9D-1C77-46F0-A006-1EC3EA88EE55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF319E9D-1C77-46F0-A006-1EC3EA88EE55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A70D99FC-A89B-4486-A35C-204ED60262F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A70D99FC-A89B-4486-A35C-204ED60262F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A70D99FC-A89B-4486-A35C-204ED60262F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A70D99FC-A89B-4486-A35C-204ED60262F1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
