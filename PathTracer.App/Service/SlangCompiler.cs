@@ -26,7 +26,8 @@ public class SlangCompiler
     public byte[] CompileComputeShader(string moduleName)
     {
         string fileName = moduleName + ".slang";
-        string source = File.ReadAllText("Resources/" + fileName);
+        string path = Path.Combine(AppContext.BaseDirectory, "Resources", fileName);
+        string source = File.ReadAllText(path);
         Module module = _session.LoadModuleFromSourceString(
             moduleName,
             fileName,

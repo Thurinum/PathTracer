@@ -101,6 +101,7 @@ public class App : IDisposable
                 PreferStandardClipSpaceYDirection = true,
                 PreferDepthRangeZeroToOne = true,
             },
+            GraphicsBackend.Vulkan,
             out Sdl2Window window,
             out GraphicsDevice device);
 
