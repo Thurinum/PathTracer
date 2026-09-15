@@ -2,32 +2,38 @@
 using Microsoft.Extensions.Logging;
 using PathTracerApp;
 using PathTracerApp.Renderer;
+using PathTracerApp.SceneGraph;
 using PathTracerApp.Shader;
 using PathTracerSceneGraph;
 
-ServiceCollection services = new();
+using var provider = ConfigureServices();
+var app = provider.GetRequiredService<App>();
+app.Run();
+return;
 
-services.AddLogging(builder => builder.AddConsole());
-services.AddSingleton<SlangCompiler>();
-services.Configure<RenderBackendOptions>(options =>
+ServiceProvider ConfigureServices()
 {
-    options.WindowWidth = 1920;
-    options.WindowHeight = 1080;
-    options.ThreadGroupSize = (8, 8, 1);
-});
-services.AddSingleton<RenderBackend>();
-services.AddSingleton<InputSystem>();
-services.AddSingleton<RenderPipeline>();
-services.AddSingleton<FrameLoop>();
-services.AddSingleton<PathTracerResources>();
-services.AddSingleton<IFrameRenderer, PathTracer>();
-services.AddSingleton<ComponentFactory>();
-services.AddSingleton<Scene>();
-services.AddSingleton<SceneManager>();
-services.AddSingleton<EventLoop>();
+    ServiceCollection services = new();
 
-using ServiceProvider provider = services.BuildServiceProvider();
+    services.AddLogging(builder => builder.AddConsole());
+    services.AddSingleton<SlangCompiler>();
+    services.Configure<RenderBackendOptions>(options =>
+    {
+        options.WindowWidth = 1920;
+        options.WindowHeight = 1080;
+        options.X = 100;
+        options.Y = 100;
+        options.ThreadGroupSize = (8, 8, 1);
+    });
+    services.AddSingleton<RenderBackend>();
+    services.AddSingleton<RenderState>();
+    services.AddSingleton<RenderPass>();
 
-FrameLoop frameLoop = provider.GetRequiredService<FrameLoop>();
+    services.AddSingleton<ComponentFactory>();
+    services.AddSingleton<SceneManager>();
+    services.AddSingleton<SceneLoop>();
 
-frameLoop.Run();
+    services.AddSingleton<App>();
+
+    return services.BuildServiceProvider();
+}

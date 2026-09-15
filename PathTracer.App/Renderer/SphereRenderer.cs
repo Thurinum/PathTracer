@@ -14,6 +14,7 @@ public class SphereRenderer(RenderState state) : Component, IRenderer
 
     public GPU_Primitive Bake()
     {
+        // todo: requirecomponents
         var transform = Parent.GetComponent<Transform>();
 
         return new GPU_Primitive

@@ -4,7 +4,7 @@ using PathTracerApp.Renderer;
 
 namespace PathTracerSceneGraph;
 
-public class EventLoop(RenderBackend backend, RenderState state)
+public class SceneLoop(RenderBackend backend, RenderState state)
 {
     private long _lastTimestamp;
     private float _deltaTime;

@@ -1,10 +1,15 @@
-﻿using PathTracerApp.SceneGraph;
+﻿using PathTracerSceneGraph;
 
-namespace PathTracerSceneGraph;
+namespace PathTracerApp.SceneGraph;
 
-public class SceneManager(Scene scene)
+public class SceneManager(ComponentFactory componentFactory)
 {
-    public SceneObject CreateObject()
+    public Scene CreateScene()
+    {
+        return new Scene(componentFactory);
+    }
+    
+    public SceneObject CreateObject(Scene scene)
     {
         var obj = new SceneObject { Owner = scene };
         scene.Objects.Add(obj);
