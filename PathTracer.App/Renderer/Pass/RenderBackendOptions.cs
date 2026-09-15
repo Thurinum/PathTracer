@@ -1,9 +1,11 @@
 namespace PathTracerApp;
 
-public sealed class AppOptions
+public sealed class RenderBackendOptions
 {
     public string AppName = "Path Tracer";
     public uint WindowWidth;
     public uint WindowHeight;
+    public int X;
+    public int Y;
     public (int, int, int) ThreadGroupSize = (8, 8, 1);
 }
