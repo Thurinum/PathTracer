@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using PathTracerApp;
 using PathTracerApp.Renderer;
 
 namespace PathTracerSceneGraph;
@@ -24,17 +23,18 @@ public class SceneLoop(RenderBackend backend, RenderState state)
                 break;
             
             backend.BeginFrame();
-            UpdateDeltaTime();
-            UpdateComponents(scene);
-            LateUpdateComponents(scene);
+            {
+                UpdateDeltaTime();
+                UpdateComponents(scene);
+                LateUpdateComponents(scene);
             
-            state.BakeRenderState();
-            backend.Render();
-            
-            backend.BeginGUI(_deltaTime, input);
-            GUIComponents(scene);
-            backend.EndGUI();
-            
+                state.BakeRenderState();
+                backend.Render();
+        
+                backend.BeginGUI(_deltaTime, input);
+                GUIComponents(scene);
+                backend.EndGUI();
+            }
             backend.EndFrame();
         }
         

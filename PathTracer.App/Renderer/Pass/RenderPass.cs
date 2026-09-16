@@ -52,8 +52,8 @@ public sealed class RenderPass(RenderState state, SlangCompiler compiler, IOptio
             new ResourceLayoutElementDescription("circles", ResourceKind.StructuredBufferReadOnly, ShaderStages.Compute),
             new ResourceLayoutElementDescription("params", ResourceKind.UniformBuffer, ShaderStages.Compute)
         );
-        
         _layout = device.ResourceFactory.CreateResourceLayout(layoutDesc);
+        
         BuildResourceSet(device);
 
         (uint g1, uint g2, uint g3) = _options.ThreadGroupSize;
@@ -91,11 +91,16 @@ public sealed class RenderPass(RenderState state, SlangCompiler compiler, IOptio
 
     public void Render(FrameContext ctx)
     {
-        // todo: delta upload
-        Span<GPU_Primitive> primitives = state.State.AsSpan();
         Params @params = new() { Count = (uint)state.Count };
-        
-        ctx.Cmd.UpdateBuffer(_primitiveBuffer, 0, primitives);
+
+        for (int i = 0; i < state.Count; i++)
+        {
+            if (!state.DirtyBits[i])
+                continue;
+            
+            ctx.Cmd.UpdateBuffer(_primitiveBuffer, (uint)i * 16, state.State[i]);
+            state.DirtyBits[i] = false;
+        }
         ctx.Cmd.UpdateBuffer(_paramsBuffer, 0, @params);
         
         ctx.Cmd.SetPipeline(_pipeline);
