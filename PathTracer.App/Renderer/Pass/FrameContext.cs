@@ -2,10 +2,9 @@
 
 namespace PathTracerApp.Renderer.Pass;
 
-public class FrameContext
+public sealed class FrameContext(GraphicsDevice device, CommandList cmd, Texture target)
 {
-    public GraphicsDevice Device;
-    public CommandList Cmd;
-    public int Width;
-    public int Height;
+    public GraphicsDevice Device { get; } = device;
+    public CommandList Cmd { get; } = cmd;
+    public Texture Target { get; } = target;
 }

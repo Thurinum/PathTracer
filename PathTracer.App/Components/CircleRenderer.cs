@@ -2,7 +2,7 @@
 
 namespace PathTracerApp.Renderer;
 
-public class SphereRenderer(RenderState state) : Component, IRenderer
+public class CircleRenderer(RenderState state) : Component, IRenderer
 {
     public int? SlotIndex { get; private set; }
     public float Radius { get; set; }

@@ -13,17 +13,18 @@ public struct GPU_Primitive
 
 public class RenderState
 {
-    private const int Capacity = 67;
-    public GPU_Primitive[] State { get; private set; } = new GPU_Primitive[Capacity];
-    private readonly bool[] _dirtyFlags = new bool[Capacity];
+    private const int _capacity = 67;
+    public GPU_Primitive[] State { get; private set; } = new GPU_Primitive[_capacity];
+    private readonly bool[] _dirtyFlags = new bool[_capacity];
     private readonly List<IRenderer> _dirtyRenderers = [];
     
+    public int Capacity => _capacity;
     public int Count { get; private set; } = 0;
 
     public int Register(IRenderer renderer)
     {
         int index = Count++;
-        if (index >= Capacity)
+        if (index >= _capacity)
             throw new InvalidOperationException("Renderer capacity exceeded. Shit renderer but blame the machine not me");
         
         _dirtyFlags[index] = true;

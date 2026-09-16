@@ -1,7 +1,9 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using NeoVeldrid;
 using NeoVeldrid.Sdl2;
 using NeoVeldrid.StartupUtilities;
+using PathTracerApp.Renderer.Pass;
 
 namespace PathTracerApp.Renderer;
 
@@ -14,7 +16,7 @@ public sealed class RenderBackend : IDisposable
     private readonly RenderPass _pass; // TODO: for now only one pass
     public bool Shown => _window.Exists;
 
-    public RenderBackend(IOptions<RenderBackendOptions> options, RenderPass pass)
+    public RenderBackend(IOptions<RenderBackendOptions> options, RenderPassFactory passFactory)
     {
         var config = options.Value;
         
@@ -49,8 +51,8 @@ public sealed class RenderBackend : IDisposable
             _device.MainSwapchain.Framebuffer.OutputDescription,
             _window.Width,
             _window.Height);
-        
-        _pass = pass;
+
+        _pass = passFactory.CreateRenderPass(_device);
     }
     
     public InputSnapshot GetInput()
@@ -61,12 +63,13 @@ public sealed class RenderBackend : IDisposable
     public void BeginFrame()
     {
         _cmd.Begin();
-        _cmd.SetFramebuffer(_device.SwapchainFramebuffer);
+        _cmd.SetFramebuffer(_device.SwapchainFramebuffer); // for imgui
     }
 
     public void Render()
     {
-        _pass.Render();
+        FrameContext ctx = new(_device, _cmd, _device.SwapchainFramebuffer.ColorTargets[0].Target);
+        _pass.Render(ctx);
     }
 
     public void EndFrame()
@@ -89,6 +92,7 @@ public sealed class RenderBackend : IDisposable
     private void OnWindowResized()
     {
         _device.ResizeMainWindow((uint)_window.Width, (uint)_window.Height);
+        _pass.Resize(_device, (uint)_window.Width, (uint)_window.Height);
         _imgui.WindowResized(_window.Width, _window.Height);
     }
 
@@ -97,6 +101,7 @@ public sealed class RenderBackend : IDisposable
         _device.WaitForIdle();
         _imgui.Dispose();
         _cmd.Dispose();
+        _pass.Dispose();
         _device.Dispose();
     }
 }

@@ -4,6 +4,7 @@ namespace PathTracerApp.SceneGraph;
 
 public class SceneObject
 {
+    public required string Name { get; init; }
     public required Scene Owner { get; init; }
     public List<Component> Components { get; } = [];
 
@@ -14,7 +15,15 @@ public class SceneObject
 
     public T GetComponent<T>() where T : Component
     {
-        return Components.OfType<T>().Single();
+        var components = GetComponents<T>();
+        
+        if (components.Length == 0)
+            throw new Exception($"No component of type {typeof(T)} found on {this}");
+        
+        if (components.Length > 1)
+            throw new Exception($"Multiple components of type {typeof(T)} found on {this}");
+
+        return components[0];
     }
 
     public bool TryGetComponent<T>(out T? component) where T : Component

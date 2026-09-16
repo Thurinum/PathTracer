@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using PathTracerApp;
 using PathTracerApp.Renderer;
+using PathTracerApp.Renderer.Pass;
 using PathTracerApp.SceneGraph;
 using PathTracerApp.Shader;
 using PathTracerSceneGraph;
@@ -27,7 +28,7 @@ ServiceProvider ConfigureServices()
     });
     services.AddSingleton<RenderBackend>();
     services.AddSingleton<RenderState>();
-    services.AddSingleton<RenderPass>();
+    services.AddSingleton<RenderPassFactory>();
 
     services.AddSingleton<ComponentFactory>();
     services.AddSingleton<SceneManager>();

@@ -9,9 +9,13 @@ public class SceneManager(ComponentFactory componentFactory)
         return new Scene(componentFactory);
     }
     
-    public SceneObject CreateObject(Scene scene)
+    public SceneObject CreateObject(Scene scene, string name)
     {
-        var obj = new SceneObject { Owner = scene };
+        var obj = new SceneObject
+        {
+            Owner = scene,
+            Name = name
+        };
         scene.Objects.Add(obj);
         return obj;
     }
