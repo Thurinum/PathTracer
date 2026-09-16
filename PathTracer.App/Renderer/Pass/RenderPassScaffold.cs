@@ -10,7 +10,7 @@ public struct Params
     public uint Count;
 }
 
-public sealed class RenderPass(RenderState state, SlangCompiler compiler, IOptions<RenderBackendOptions> options) : IDisposable
+public sealed class RenderPassScaffold(RenderState state, SlangCompiler compiler, IOptions<RenderBackendOptions> options) : IDisposable
 {
     private RenderBackendOptions _options = null!;
     private NeoVeldrid.Shader _shader = null!;
@@ -25,7 +25,7 @@ public sealed class RenderPass(RenderState state, SlangCompiler compiler, IOptio
     {
         _options = options.Value;
 
-        byte[] shaderBytes = compiler.CompileComputeShader("image");
+        byte[] shaderBytes = compiler.CompileComputeShader("circles");
         ShaderDescription shaderDesc = new(ShaderStages.Compute, shaderBytes, "main");
         _shader = device.ResourceFactory.CreateShader(shaderDesc);
 
@@ -106,8 +106,9 @@ public sealed class RenderPass(RenderState state, SlangCompiler compiler, IOptio
         ctx.Cmd.SetPipeline(_pipeline);
         ctx.Cmd.SetComputeResourceSet(0, _set);
 
-        uint groupCountX = (ctx.Target.Width + 7) / 8;
-        uint groupCountY = (ctx.Target.Height + 7) / 8;
+        var (g1, g2, g3) = _options.ThreadGroupSize;
+        uint groupCountX = (ctx.Target.Width + g1 - 1) / g1;
+        uint groupCountY = (ctx.Target.Height + g2 - 1) / g2;
         ctx.Cmd.Dispatch(groupCountX, groupCountY, 1);
         
         ctx.Cmd.CopyTexture(_outputTex, ctx.Target);

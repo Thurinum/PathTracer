@@ -5,9 +5,9 @@ namespace PathTracerApp.Renderer.Pass;
 
 public class RenderPassFactory(IServiceProvider provider)
 {
-    public RenderPass CreateRenderPass(GraphicsDevice device)
+    public RenderPassScaffold CreateRenderPass(GraphicsDevice device)
     {
-        var pass = ActivatorUtilities.CreateInstance<RenderPass>(provider);
+        var pass = ActivatorUtilities.CreateInstance<RenderPassScaffold>(provider);
         pass.Initialize(device);
         return pass;
     }

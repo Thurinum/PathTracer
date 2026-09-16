@@ -13,7 +13,7 @@ public sealed class RenderBackend : IDisposable
     private readonly GraphicsDevice _device;
     private readonly CommandList _cmd;
     private readonly ImGuiRenderer _imgui;
-    private readonly RenderPass _pass; // TODO: for now only one pass
+    private readonly RenderPassScaffold _pass; // TODO: for now only one pass
     public bool Shown => _window.Exists;
 
     public RenderBackend(IOptions<RenderBackendOptions> options, RenderPassFactory passFactory)
