@@ -1,139 +1,40 @@
-﻿using NeoVeldrid;
-using NeoVeldrid.Sdl2;
-using NeoVeldrid.SPIRV;
-using NeoVeldrid.StartupUtilities;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using PathTracerApp;
+using PathTracerApp.Renderer;
+using PathTracerApp.Renderer.Pass;
+using PathTracerApp.SceneGraph;
+using PathTracerApp.Shader;
+using PathTracerSceneGraph;
 
+using var provider = ConfigureServices();
+var app = provider.GetRequiredService<App>();
+app.Run();
+return;
 
-const int WindowWidth = 1024;
-const int WindowHeight = 768;
-
-WindowCreateInfo windowDesc = new()
+ServiceProvider ConfigureServices()
 {
-    X = 100,
-    Y = 100,
-    WindowWidth =  WindowWidth,
-    WindowHeight = WindowHeight,
-    WindowTitle = "Bruh"
-};
+    ServiceCollection services = new();
 
-NeoVeldridStartup.CreateWindowAndGraphicsDevice(
-    windowDesc, 
-    new GraphicsDeviceOptions
+    services.AddLogging(builder => builder.AddConsole());
+    services.AddSingleton<SlangCompiler>();
+    services.Configure<RenderBackendOptions>(options =>
     {
-        PreferStandardClipSpaceYDirection = true,
-        PreferDepthRangeZeroToOne = true,
-    },
-    out Sdl2Window window,
-    out GraphicsDevice device);
+        options.WindowWidth = 1920;
+        options.WindowHeight = 1080;
+        options.X = 100;
+        options.Y = 100;
+        options.ThreadGroupSize = (8, 8, 1);
+    });
+    services.AddSingleton<RenderBackend>();
+    services.AddSingleton<RenderState>();
+    services.AddSingleton<RenderPassFactory>();
 
-TextureDescription texDesc = TextureDescription.Texture2D(
-    WindowWidth,
-    WindowHeight,
-    1,
-    1,
-    PixelFormat.R8_G8_B8_A8_UNorm,
-    TextureUsage.Storage);
-Texture outputTexture = device.ResourceFactory.CreateTexture(texDesc);
+    services.AddSingleton<ComponentFactory>();
+    services.AddSingleton<SceneManager>();
+    services.AddSingleton<SceneLoop>();
 
-byte[] shaderBytes = File.ReadAllBytes("Resources/image.compute");
-ShaderDescription shaderDesc = new ShaderDescription(
-    ShaderStages.Compute,
-    shaderBytes,
-    "main"
-);
+    services.AddSingleton<App>();
 
-Shader computeShader = device.ResourceFactory.CreateFromSpirv(shaderDesc);
-
-ResourceLayout layout =
-    device.ResourceFactory.CreateResourceLayout(
-        new ResourceLayoutDescription(
-            new ResourceLayoutElementDescription(
-                "outputImage",
-                ResourceKind.TextureReadWrite,
-                ShaderStages.Compute
-            )
-        )
-    );
-
-
-ResourceSet set =
-    device.ResourceFactory.CreateResourceSet(
-        new ResourceSetDescription(
-            layout,
-            outputTexture
-        )
-    );
-
-
-Pipeline pipeline =
-    device.ResourceFactory.CreateComputePipeline(
-        new ComputePipelineDescription(
-            computeShader,
-            layout,
-            8,
-            8,
-            1
-        )
-    );
-
-
-CommandList cl =
-    device.ResourceFactory.CreateCommandList();
-
-
-cl.Begin();
-
-cl.SetPipeline(pipeline);
-cl.SetComputeResourceSet(0, set);
-
-cl.Dispatch(
-    WindowWidth / 8,
-    WindowHeight / 8,
-    1
-);
-
-cl.End();
-
-
-device.SubmitCommands(cl);
-device.WaitForIdle();
-
-
-//
-// Copy GPU texture to CPU staging texture
-//
-
-Texture staging =
-    device.ResourceFactory.CreateTexture(
-        TextureDescription.Texture2D(
-            WindowWidth,
-            WindowHeight,
-            1,
-            1,
-            PixelFormat.R8_G8_B8_A8_UNorm,
-            TextureUsage.Staging
-        )
-    );
-
-
-cl.Begin();
-
-cl.CopyTexture(
-    outputTexture,
-    staging
-);
-
-cl.End();
-
-device.SubmitCommands(cl);
-device.WaitForIdle();
-
-
-while (window.Exists)
-{
-    window.PumpEvents();
+    return services.BuildServiceProvider();
 }
-
-device.Dispose();
