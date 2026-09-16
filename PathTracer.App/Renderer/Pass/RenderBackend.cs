@@ -33,6 +33,7 @@ public sealed class RenderBackend : IDisposable
         {
             PreferStandardClipSpaceYDirection = true,
             PreferDepthRangeZeroToOne = true,
+            SyncToVerticalBlank = config.VSync,
         };
 
         NeoVeldridStartup.CreateWindowAndGraphicsDevice
