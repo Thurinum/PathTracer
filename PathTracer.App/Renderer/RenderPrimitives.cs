@@ -29,9 +29,10 @@ public sealed class RenderPrimitives<T> where T : unmanaged
     
     public int Register(IRenderer<T> renderer)
     {
-        int index = Count++;
-        if (index >= Capacity)
+        if (Count >= Capacity)
             throw new InvalidOperationException("No more space in the primitive buffer.");
+        
+        int index = Count++;
         
         _dirtiness[index] = true;
         _renderers.Add(renderer);

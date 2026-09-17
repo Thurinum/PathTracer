@@ -2,7 +2,6 @@ using Microsoft.Extensions.Options;
 using NeoVeldrid;
 using PathTracerApp.Renderer.Pass;
 using PathTracerApp.Shader;
-using Silk.NET.Maths;
 
 namespace PathTracerApp.Renderer.Passes;
 
