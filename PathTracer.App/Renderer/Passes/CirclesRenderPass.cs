@@ -2,6 +2,7 @@ using Microsoft.Extensions.Options;
 using NeoVeldrid;
 using PathTracerApp.Renderer.Pass;
 using PathTracerApp.Shader;
+using Silk.NET.Maths;
 
 namespace PathTracerApp.Renderer.Passes;
 
@@ -10,7 +11,7 @@ public struct Params
     public uint Count;
 }
 
-public class CirclesRenderPass(SlangCompiler compiler, IOptions<RenderBackendOptions> options, RenderState state) : RenderPass(compiler, options)
+public class CirclesRenderPass(SlangCompiler compiler, IOptions<RenderBackendOptions> options, RenderPrimitives<CirclePrimitive> primitives) : RenderPass(compiler, options)
 {
     protected override string ShaderModule => "circles";
     
@@ -21,8 +22,8 @@ public class CirclesRenderPass(SlangCompiler compiler, IOptions<RenderBackendOpt
     {
         BufferDescription primitiveBufferDesc = new()
         {
-            SizeInBytes = (uint)state.Capacity * 16,
-            StructureByteStride = 16,
+            SizeInBytes = primitives.SizeInBytes,
+            StructureByteStride = primitives.Stride,
             Usage = BufferUsage.StructuredBufferReadOnly | BufferUsage.Dynamic
         };
         _primitiveBuffer = device.ResourceFactory.CreateBuffer(primitiveBufferDesc);
@@ -40,15 +41,15 @@ public class CirclesRenderPass(SlangCompiler compiler, IOptions<RenderBackendOpt
 
     protected override void Upload(CommandList cmd)
     {
-        Params @params = new() { Count = (uint)state.Count };
+        Params @params = new() { Count = (uint)primitives.Count };
 
-        for (int i = 0; i < state.Count; i++)
+        for (int i = 0; i < primitives.Count; i++)
         {
-            if (!state.DirtyBits[i])
+            if (!primitives.IsDirty(i))
                 continue;
             
-            cmd.UpdateBuffer(_primitiveBuffer, (uint)i * 16, state.State[i]);
-            state.DirtyBits[i] = false;
+            cmd.UpdateBuffer(_primitiveBuffer, (uint)i * primitives.Stride, primitives.State[i]);
+            primitives.ClearDirty(i);
         }
         
         cmd.UpdateBuffer(_paramsBuffer, 0, @params);

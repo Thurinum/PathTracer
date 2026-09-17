@@ -3,7 +3,7 @@ using PathTracerApp.Renderer;
 
 namespace PathTracerSceneGraph;
 
-public class SceneLoop(RenderBackend backend, RenderState state)
+public class SceneLoop(RenderBackend backend, RenderState renderState)
 {
     private long _lastTimestamp;
     private float _deltaTime;
@@ -14,6 +14,7 @@ public class SceneLoop(RenderBackend backend, RenderState state)
         
         AwakeComponents(scene);
         StartComponents(scene);
+        renderState.Collect(scene);
         
         while (backend.Shown)
         {
@@ -28,7 +29,7 @@ public class SceneLoop(RenderBackend backend, RenderState state)
                 UpdateComponents(scene);
                 LateUpdateComponents(scene);
             
-                state.BakeRenderState();
+                renderState.Bake();
                 backend.Render();
         
                 backend.BeginGUI(_deltaTime, input);

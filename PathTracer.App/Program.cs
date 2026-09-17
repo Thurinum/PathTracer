@@ -28,8 +28,8 @@ ServiceProvider ConfigureServices()
     });
     services.AddSingleton<RenderBackend>();
     services.AddSingleton<RenderState>();
+    services.AddSingleton(typeof(RenderPrimitives<>), typeof(RenderPrimitives<>));    
     services.AddSingleton<RenderPassFactory>();
-
     services.AddSingleton<ComponentFactory>();
     services.AddSingleton<SceneManager>();
     services.AddSingleton<SceneLoop>();

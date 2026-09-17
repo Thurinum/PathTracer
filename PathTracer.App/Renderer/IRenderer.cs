@@ -1,7 +1,6 @@
 ﻿namespace PathTracerApp.Renderer;
 
-public interface IRenderer
+public interface IRenderer<out T> where T : unmanaged
 {
-    int? SlotIndex { get; }
-    GPU_Primitive Bake();
+    T Bake();
 }
