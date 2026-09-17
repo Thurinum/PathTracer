@@ -1,9 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NeoVeldrid;
 using NeoVeldrid.Sdl2;
 using NeoVeldrid.StartupUtilities;
 using PathTracerApp.Renderer.Pass;
+using PathTracerApp.Renderer.Passes;
 
 namespace PathTracerApp.Renderer;
 
@@ -13,10 +15,10 @@ public sealed class RenderBackend : IDisposable
     private readonly GraphicsDevice _device;
     private readonly CommandList _cmd;
     private readonly ImGuiRenderer _imgui;
-    private readonly RenderPassScaffold _pass; // TODO: for now only one pass
+    private readonly RenderPass _pass; // TODO: Support multiple passes
     public bool Shown => _window.Exists;
 
-    public RenderBackend(IOptions<RenderBackendOptions> options, RenderPassFactory passFactory)
+    public RenderBackend(IOptions<RenderBackendOptions> options, RenderPassFactory passFactory, ILogger<RenderBackend> logger)
     {
         var config = options.Value;
         
@@ -44,6 +46,8 @@ public sealed class RenderBackend : IDisposable
             out _window,
             out _device
         );
+        
+        logger.LogInformation($"Device: {_device.DeviceName} ({_device.VendorName})");
 
         _window.Resized += OnWindowResized;
         _cmd = _device.ResourceFactory.CreateCommandList();
@@ -53,7 +57,8 @@ public sealed class RenderBackend : IDisposable
             _window.Width,
             _window.Height);
 
-        _pass = passFactory.CreateRenderPass(_device);
+        // TODO: Render pass type hardcoded
+        _pass = passFactory.CreateRenderPass<CirclesRenderPass>(_device);
     }
     
     public InputSnapshot GetInput()

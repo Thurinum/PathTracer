@@ -16,7 +16,7 @@ public class App(SceneLoop loop, SceneManager sceneManager)
             .CreateObject(scene, "fpsCounter")
             .AddComponent<FPSCounter>();
 
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 1000; i++)
         {
             AddCircle(scene, Random.Shared.NextSingle() * (150 - 50), Random.Shared.NextSingle(), Random.Shared.NextSingle());
         }
