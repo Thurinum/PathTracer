@@ -33,6 +33,8 @@ public class SceneLoop(RenderBackend backend)
                 backend.BeginGUI(_deltaTime, input);
                 GUIComponents(scene);
                 backend.EndGUI();
+                
+                scene.FlushDestroyed();
             }
             backend.EndFrame();
         }
@@ -100,7 +102,7 @@ public class SceneLoop(RenderBackend backend)
             }
         }   
     }
-    
+
     private void DestroyComponents(Scene scene)
     {
         foreach (var obj in scene.Objects)

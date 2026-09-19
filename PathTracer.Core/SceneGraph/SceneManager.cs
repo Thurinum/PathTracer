@@ -18,9 +18,12 @@ public class SceneManager(ComponentFactory componentFactory)
         return obj;
     }
 
-    public void DestroyObject(SceneObject obj)
+    public void DestroyObject(Scene scene, SceneObject obj)
     {
-        // TODO: Must wait until the end of the frame to delete
-        throw new NotImplementedException();
+        if (obj.IsPendingDestroy)
+            return;
+
+        obj.IsPendingDestroy = true;
+        scene.PendingDestroy.Add(obj);
     }
 }

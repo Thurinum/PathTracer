@@ -3,11 +3,13 @@ using PathTracerCore.Renderer.Primitives;
 
 namespace PathTracerCore.SceneGraph;
 
-public abstract class Component
+public abstract class Component : IDestroyable
 {
     public SceneObject Parent { get; internal set; } = null!;
     public ILogger Logger { get; internal set; } = null!;
     protected Scene Root => Parent.Owner;
+    public bool IsPendingDestroy { get; internal set; }
+    public bool IsDestroyed { get; private set; }
     
     // set by the factory so child renderers don't need to inject by constructor
     internal PrimitiveRegistry Primitives = null!;
@@ -18,4 +20,14 @@ public abstract class Component
     public virtual void LateUpdate(float deltaTime) {}
     public virtual void OnGUI() {}
     public virtual void OnDestroy() {}
+
+    public void Destroy()
+    {
+        if (IsDestroyed)
+            return;
+
+        IsDestroyed = true;
+        OnDestroy();
+        Parent.Components.Remove(this);
+    }
 }
