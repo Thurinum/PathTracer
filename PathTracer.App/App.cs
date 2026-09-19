@@ -29,7 +29,7 @@ public class App(SceneLoop loop, SceneManager sceneManager)
         var trans = obj.AddComponent<Transform>();
         trans.Position = new Vector3(x, y, 0.0f);
         
-        var circle = obj.AddComponent<CircleRenderer>();
+        var circle = obj.AddComponent<CircleComponent>();
         circle.Radius = r;
         
         var mover = obj.AddComponent<TestMove>();

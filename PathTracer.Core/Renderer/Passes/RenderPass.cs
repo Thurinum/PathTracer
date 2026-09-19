@@ -14,7 +14,7 @@ public record ResourceBinding
 public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions> options) : IDisposable
 {
     private EngineOptions _options = null!;
-    private NeoVeldrid.Shader? _shader;
+    private Shader? _shader;
     private Texture? _outputTex;
     private ResourceLayout? _layout;
     private ResourceSet? _set;
@@ -24,7 +24,7 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
     protected abstract string ShaderModule { get; }
 
     protected abstract void SetupResources(GraphicsDevice device);
-    protected abstract void Upload(CommandList cmd);
+    protected abstract void Upload(FrameContext ctx);
     protected abstract void DisposeResources();
 
     protected void Register(string name, ResourceKind kind, BindableResource resource)
@@ -96,6 +96,18 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
         ResourceSetDescription setDesc = new(_layout, elements);
         _set = device.ResourceFactory.CreateResourceSet(setDesc);
     }
+    
+    protected void UpdateBinding(string name, BindableResource resource, GraphicsDevice device)
+    {
+        int i = _bindings.FindIndex(b => b.Desc.Name == name);
+        if (i < 0)
+        {
+            throw new ArgumentException($"No binding named '{name}'.", nameof(name));
+        }
+        
+        _bindings[i].Resource = resource;
+        BuildResourceSet(device);
+    }
 
     private void BuildPipeline(GraphicsDevice device)
     {
@@ -106,7 +118,7 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
 
     public void Render(FrameContext ctx)
     {
-        Upload(ctx.Cmd);
+        Upload(ctx);
         
         ctx.Cmd.SetPipeline(_pipeline);
         ctx.Cmd.SetComputeResourceSet(0, _set);
