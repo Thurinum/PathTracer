@@ -1,16 +1,18 @@
 using Microsoft.Extensions.Options;
 using NeoVeldrid;
-using PathTracerApp.Renderer.Pass;
-using PathTracerApp.Shader;
+using PathTracerCore;
+using PathTracerCore.Renderer;
+using PathTracerCore.Renderer.Passes;
+using PathTracerCore.Renderer.Shaders;
 
-namespace PathTracerApp.Renderer.Passes;
+namespace PathTracerApp.RenderPasses;
 
 public struct Params
 {
     public uint Count;
 }
 
-public class CirclesRenderPass(SlangCompiler compiler, IOptions<RenderBackendOptions> options, RenderPrimitives<CirclePrimitive> primitives) : RenderPass(compiler, options)
+public class CirclesRenderPass(SlangCompiler compiler, IOptions<EngineOptions> options, RenderPrimitives<CirclePrimitive> primitives) : RenderPass(compiler, options)
 {
     protected override string ShaderModule => "circles";
     

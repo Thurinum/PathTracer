@@ -1,8 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using PathTracerApp.SceneGraph;
 
-namespace PathTracerSceneGraph;
+namespace PathTracerCore.SceneGraph;
 
 public class ComponentFactory(IServiceProvider provider, ILoggerFactory loggerFactory)
 {

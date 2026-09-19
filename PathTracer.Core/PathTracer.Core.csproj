@@ -11,6 +11,10 @@
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
       <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.12" />
       <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.12" />
+      <PackageReference Include="NeoVeldrid" Version="1.2.1" />
+      <PackageReference Include="NeoVeldrid.ImGui" Version="1.2.1" />
+      <PackageReference Include="NeoVeldrid.StartupUtilities" Version="1.2.1" />
+      <PackageReference Include="Prowl.Slang" Version="3.3.0" />
     </ItemGroup>
 
 </Project>

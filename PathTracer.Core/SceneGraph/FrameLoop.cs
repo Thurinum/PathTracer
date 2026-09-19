@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
-using PathTracerApp.Renderer;
+using PathTracerCore.Renderer;
 
-namespace PathTracerSceneGraph;
+namespace PathTracerCore.SceneGraph;
 
 public class SceneLoop(RenderBackend backend, RenderState renderState)
 {

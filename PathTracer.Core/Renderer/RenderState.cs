@@ -1,6 +1,6 @@
-﻿using PathTracerSceneGraph;
+﻿using PathTracerCore.SceneGraph;
 
-namespace PathTracerApp.Renderer;
+namespace PathTracerCore.Renderer;
 
 public sealed class RenderState(
     RenderPrimitives<CirclePrimitive> circles)

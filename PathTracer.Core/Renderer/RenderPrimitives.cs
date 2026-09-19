@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace PathTracerApp.Renderer;
+namespace PathTracerCore.Renderer;
 
 [StructLayout(LayoutKind.Sequential)]
 public record struct CirclePrimitive

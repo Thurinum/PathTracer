@@ -1,13 +1,17 @@
+using Microsoft.Extensions.Options;
 using Prowl.Slang;
 
-namespace PathTracerApp.Shader;
+namespace PathTracerCore.Renderer.Shaders;
 
 public class SlangCompiler
 {
+    private readonly EngineOptions _options;
     private readonly Session _session;
 
-    public SlangCompiler()
+    public SlangCompiler(IOptions<EngineOptions> options)
     {
+        _options = options.Value;
+        
         TargetDescription target = new()
         {
             Format = CompileTarget.Spirv,
@@ -26,7 +30,7 @@ public class SlangCompiler
     public byte[] CompileComputeShader(string moduleName)
     {
         string fileName = moduleName + ".slang";
-        string path = Path.Combine(AppContext.BaseDirectory, "Resources", fileName);
+        string path = Path.Combine(AppContext.BaseDirectory, _options.ShadersDir, fileName);
         string source = File.ReadAllText(path);
         Module module = _session.LoadModuleFromSourceString(
             moduleName,

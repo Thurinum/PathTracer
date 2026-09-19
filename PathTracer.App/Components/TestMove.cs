@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
-using PathTracerSceneGraph;
+using PathTracerCore.SceneGraph;
 
-namespace PathTracerApp.Renderer;
+namespace PathTracerApp.Components;
 
 public class TestMove : Component
 {

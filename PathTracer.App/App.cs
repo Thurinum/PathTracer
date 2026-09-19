@@ -1,8 +1,6 @@
 ﻿using System.Numerics;
 using PathTracerApp.Components;
-using PathTracerApp.Renderer;
-using PathTracerApp.SceneGraph;
-using PathTracerSceneGraph;
+using PathTracerCore.SceneGraph;
 
 namespace PathTracerApp;
 

@@ -1,6 +1,7 @@
-﻿using PathTracerSceneGraph;
+﻿using PathTracerCore.Renderer;
+using PathTracerCore.SceneGraph;
 
-namespace PathTracerApp.Renderer;
+namespace PathTracerApp.Components;
 
 public class CircleRenderer : Component, IRenderer<CirclePrimitive>
 {

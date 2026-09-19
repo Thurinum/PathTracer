@@ -1,7 +1,6 @@
 ﻿using System.Numerics;
-using PathTracerSceneGraph;
 
-namespace PathTracerApp.Renderer;
+namespace PathTracerCore.SceneGraph;
 
 public class Transform : Component
 {

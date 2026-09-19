@@ -1,6 +1,4 @@
-﻿using PathTracerApp.SceneGraph;
-
-namespace PathTracerSceneGraph;
+﻿namespace PathTracerCore.SceneGraph;
 
 public class Scene(ComponentFactory componentFactory)
 {

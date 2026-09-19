@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using PathTracerApp.SceneGraph;
 
-namespace PathTracerSceneGraph;
+namespace PathTracerCore.SceneGraph;
 
 public abstract class Component
 {

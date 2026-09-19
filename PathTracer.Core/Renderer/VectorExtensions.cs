@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace PathTracerApp.Renderer;
+namespace PathTracerCore.Renderer;
 
 public static class VectorExtensions
 {

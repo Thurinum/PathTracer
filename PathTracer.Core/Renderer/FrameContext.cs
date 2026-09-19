@@ -1,6 +1,6 @@
 ﻿using NeoVeldrid;
 
-namespace PathTracerApp.Renderer.Pass;
+namespace PathTracerCore.Renderer;
 
 public sealed class FrameContext(GraphicsDevice device, CommandList cmd, Texture target)
 {

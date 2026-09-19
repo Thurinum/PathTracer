@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 using ImGuiNET;
-using PathTracerSceneGraph;
+using PathTracerCore.SceneGraph;
 
 namespace PathTracerApp.Components;
 

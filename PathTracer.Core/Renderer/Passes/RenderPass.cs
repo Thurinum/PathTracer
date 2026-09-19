@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Options;
 using NeoVeldrid;
-using PathTracerApp.Shader;
+using PathTracerCore.Renderer.Shaders;
 
-namespace PathTracerApp.Renderer.Pass;
+namespace PathTracerCore.Renderer.Passes;
 
 public record ResourceBinding
 {
@@ -11,9 +11,9 @@ public record ResourceBinding
 }
 
 // TODO: multiple inputs
-public abstract class RenderPass(SlangCompiler compiler, IOptions<RenderBackendOptions> options) : IDisposable
+public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions> options) : IDisposable
 {
-    private RenderBackendOptions _options = null!;
+    private EngineOptions _options = null!;
     private NeoVeldrid.Shader? _shader;
     private Texture? _outputTex;
     private ResourceLayout? _layout;
