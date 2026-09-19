@@ -20,7 +20,6 @@ ServiceProvider ConfigureServices()
         options.WindowHeight = 1080;
         options.X = 100;
         options.Y = 100;
-        options.ThreadGroupSize = (8, 8, 1);
     }, passes =>
     {
         passes.Use<CirclesRenderPass>();

@@ -19,6 +19,7 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
     private ResourceLayout? _layout;
     private ResourceSet? _set;
     private Pipeline? _pipeline;
+    private (uint x, uint y, uint z) _threadGroupSize;
     private readonly List<ResourceBinding> _bindings = [];
     
     protected abstract string ShaderModule { get; }
@@ -62,9 +63,10 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
 
     private void CompileShader(GraphicsDevice device)
     {
-        byte[] shaderBytes = compiler.CompileComputeShader(ShaderModule);
-        ShaderDescription shaderDesc = new(ShaderStages.Compute, shaderBytes, "main");
+        CompiledShader shader = compiler.CompileComputeShader(ShaderModule);
+        ShaderDescription shaderDesc = new(ShaderStages.Compute, shader.Code, SlangCompiler.EntryPointName);
         _shader = device.ResourceFactory.CreateShader(shaderDesc);
+        _threadGroupSize = shader.GroupSize;
     }
 
     private void BuildOutputTexture(GraphicsDevice device, uint width, uint height)
@@ -111,9 +113,7 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
 
     private void BuildPipeline(GraphicsDevice device)
     {
-        (uint g1, uint g2, uint g3) = _options.ThreadGroupSize;
-        ComputePipelineDescription pipelineDesc = new(_shader, _layout, g1, g2, g3);
-        _pipeline = device.ResourceFactory.CreateComputePipeline(pipelineDesc);
+        ComputePipelineDescription pipelineDesc = new(_shader, _layout, _threadGroupSize.x, _threadGroupSize.y, _threadGroupSize.z); _pipeline = device.ResourceFactory.CreateComputePipeline(pipelineDesc);
     }
 
     public void Render(FrameContext ctx)
@@ -123,9 +123,8 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
         ctx.Cmd.SetPipeline(_pipeline);
         ctx.Cmd.SetComputeResourceSet(0, _set);
         
-        var (g1, g2, _) = _options.ThreadGroupSize;
-        uint groupCountX = (ctx.Target.Width + g1 - 1) / g1;
-        uint groupCountY = (ctx.Target.Height + g2 - 1) / g2;
+        uint groupCountX = (ctx.Target.Width + _threadGroupSize.x - 1) / _threadGroupSize.x;
+        uint groupCountY = (ctx.Target.Height + _threadGroupSize.y - 1) / _threadGroupSize.y;
         ctx.Cmd.Dispatch(groupCountX, groupCountY, 1);
         
         ctx.Cmd.CopyTexture(_outputTex, ctx.Target);

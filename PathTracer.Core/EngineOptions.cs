@@ -10,7 +10,4 @@ public sealed class EngineOptions
     
     public bool VSync = true;
     public string ShadersDir = "Shaders";
-    
-    // TODO: This should be reflected from the shader
-    public (uint, uint, uint) ThreadGroupSize = (8, 8, 1);
 }
