@@ -3,16 +3,18 @@ using PathTracerCore.SceneGraph;
 
 namespace PathTracerApp.Components;
 
-public class TestMove : Component
+public class RandomMover : Component
 {
     public float Speed { get; set; } = 1.0f;
 
-    private Vector2 _direction;
+    private Vector3 _direction;
 
     public override void Awake()
     {
+        float z = Random.Shared.NextSingle() * 2f - 1f;
         float angle = Random.Shared.NextSingle() * MathF.Tau;
-        _direction = new Vector2(MathF.Cos(angle), MathF.Sin(angle));
+        float radius = MathF.Sqrt(1f - z * z);
+        _direction = new Vector3(radius * MathF.Cos(angle), radius * MathF.Sin(angle), z);
     }
 
     public override void Update(float deltaTime)
@@ -22,6 +24,7 @@ public class TestMove : Component
 
         position.X += _direction.X * Speed * deltaTime;
         position.Y += _direction.Y * Speed * deltaTime;
+        position.Z += _direction.Z * Speed * deltaTime;
 
         if (position.X <= 0f)
         {

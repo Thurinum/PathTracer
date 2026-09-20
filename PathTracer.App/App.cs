@@ -32,11 +32,11 @@ public class App(SceneLoop loop, SceneManager sceneManager)
         orbit.AzimuthDegrees = 0f;
         orbit.OrbitSpeedDegreesPerSecond = 0f;   // 0 = static; 30 = auto-orbit
         
-        AddPlane(scene, new Vector3( 0, -1,  0), Quaternion.FromEuler(new Vector3(  0, 0,   0))); // floor  +Y
-        AddPlane(scene, new Vector3( 0,  1,  0), Quaternion.FromEuler(new Vector3(180, 0,   0))); // ceil   -Y
-        AddPlane(scene, new Vector3(-1,  0,  0), Quaternion.FromEuler(new Vector3(  0, 0, -90))); // left   +X
-        AddPlane(scene, new Vector3( 1,  0,  0), Quaternion.FromEuler(new Vector3(  0, 0,  90))); // right  -X
-        AddPlane(scene, new Vector3( 0,  0, -1), Quaternion.FromEuler(new Vector3( 90, 0,   0))); // back   +Z
+        AddPlane(scene, new Vector3( 0, -1,  0), Quaternion.FromEuler(new Vector3(-90,   0,  0))); // floor  +Y
+        AddPlane(scene, new Vector3( 0,  1,  0), Quaternion.FromEuler(new Vector3( 90,   0,  0))); // ceil   -Y
+        AddPlane(scene, new Vector3(-1,  0,  0), Quaternion.FromEuler(new Vector3(  0,  90,  0))); // left   +X
+        AddPlane(scene, new Vector3( 1,  0,  0), Quaternion.FromEuler(new Vector3(  0, -90,  0))); // right  -X
+        AddPlane(scene, new Vector3( 0,  0, -1), Quaternion.FromEuler(new Vector3(  0,   0,  0))); // back   +Z
         
         loop.Run(scene);
     }
@@ -49,6 +49,10 @@ public class App(SceneLoop loop, SceneManager sceneManager)
         trans.Rotation = rot;
         
         var plane = obj.AddComponent<PlaneComponent>();
+        plane.Width = 2f;
+        plane.Height = 2f;
+
+        obj.AddComponent<RandomMover>();
     }
 
     private void AddCircle(Scene scene, float r, float x, float y)
@@ -61,7 +65,7 @@ public class App(SceneLoop loop, SceneManager sceneManager)
         var circle = obj.AddComponent<CircleComponent>();
         circle.Radius = r;
         
-        var mover = obj.AddComponent<TestMove>();
+        var mover = obj.AddComponent<RandomMover>();
         mover.Speed = 0.2f;
     }
 }

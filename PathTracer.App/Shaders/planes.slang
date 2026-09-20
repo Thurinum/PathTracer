@@ -1,9 +1,8 @@
 struct Plane 
 {
     float3 Center;
-    float _Fuck;
-    float3 Normal;
-    float _You;
+    float3 U;
+    float3 V;
 }
 
 struct Camera
@@ -50,17 +49,22 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID)
     float3 hitN = 0.0;
     bool hit = false;
 
-// tmeporary
     for (uint i = 0; i < params.Count; ++i)
     {
         Plane p = planes[i];
-        float denom = dot(p.Normal, dir);
-        if (abs(denom) < 1e-6) continue;             // parallel
-        float t = dot(p.Normal, p.Center - origin) / denom;
-        if (t > 1e-4 && t < bestT)
-        {
-            bestT = t; hitN = p.Normal; hit = true;  // nearest plane wins
-        }
+        float3 n = normalize(cross(p.U, p.V));
+        float denom = dot(n, dir);
+        if (abs(denom) < 1e-6) continue;                      // parallel
+    
+        float t = dot(n, p.Center - origin) / denom;
+        if (t <= 1e-4 || t >= bestT) continue;                // behind or farther
+    
+        float3 w = origin + t * dir - p.Center;
+        float a = dot(w, p.U) / dot(p.U, p.U);                // U ⟂ V, so this is exact
+        float b = dot(w, p.V) / dot(p.V, p.V);
+        if (max(abs(a), abs(b)) > 1.0) continue;              // outside the rectangle
+    
+        bestT = t; hitN = n; hit = true;
     }
 
     float3 color = float3(0.0);

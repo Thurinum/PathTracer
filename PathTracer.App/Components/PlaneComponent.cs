@@ -4,17 +4,20 @@ using PathTracerCore.SceneGraph;
 
 namespace PathTracerApp.Components;
 
-[StructLayout(LayoutKind.Explicit, Size = 32)]
+[StructLayout(LayoutKind.Explicit, Size = 48)]
 public record struct PlanePrimitive
 {
     [FieldOffset(00)] public Vector3 Point;
-    [FieldOffset(16)] public Vector3 Normal;
+    [FieldOffset(16)] public Vector3 ExtentX;
+    [FieldOffset(32)] public Vector3 ExtentY;
 }   
 
 public class PlaneComponent : RendererBase<PlanePrimitive>
 {
-    public float Radius { get; set; }
     private Transform _transform = null!;
+
+    public float Width { get; set; } = 5.0f;
+    public float Height { get; set; } = 5.0f;
 
     public override void Awake()
     {
@@ -27,7 +30,9 @@ public class PlaneComponent : RendererBase<PlanePrimitive>
         return new PlanePrimitive
         {
             Point = _transform.Position,
-            Normal = Vector3.Transform(Vector3.UnitY, _transform.Rotation)
+            ExtentX = Vector3.Transform(Vector3.UnitX, _transform.Rotation) * (Width * 0.5f),
+            ExtentY = Vector3.Transform(Vector3.UnitY, _transform.Rotation) * (Height * 0.5f),
+
         };
     }
 }
