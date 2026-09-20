@@ -25,6 +25,13 @@ public class App(SceneLoop loop, SceneManager sceneManager)
         //     AddCircle(scene, Random.Shared.NextSingle() * (150 - 50), Random.Shared.NextSingle(), Random.Shared.NextSingle());
         // }
         
+        var orbit = camera.AddComponent<OrbitCameraComponent>();
+        orbit.Target = Vector3.Zero;
+        orbit.Distance = 4f;
+        orbit.ElevationDegrees = 20f;
+        orbit.AzimuthDegrees = 0f;
+        orbit.OrbitSpeedDegreesPerSecond = 0f;   // 0 = static; 30 = auto-orbit
+        
         AddPlane(scene, new Vector3( 0, -1,  0), Quaternion.FromEuler(new Vector3(  0, 0,   0))); // floor  +Y
         AddPlane(scene, new Vector3( 0,  1,  0), Quaternion.FromEuler(new Vector3(180, 0,   0))); // ceil   -Y
         AddPlane(scene, new Vector3(-1,  0,  0), Quaternion.FromEuler(new Vector3(  0, 0, -90))); // left   +X
