@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using PathTracerCore.Renderer;
+using PathTracerCore.Renderer.Camera;
 using PathTracerCore.Renderer.Passes;
 using PathTracerCore.Renderer.Primitives;
 using PathTracerCore.Renderer.Shaders;
@@ -26,6 +27,7 @@ public static class ServiceCollectionExtensions
             
             services.AddSingleton<SlangCompiler>();
             services.AddSingleton<RenderBackend>();
+            services.AddSingleton<CameraState>();
             services.AddSingleton<PrimitiveRegistry>();
             services.AddSingleton<RenderPassFactory>();
             services.AddSingleton<ComponentFactory>();

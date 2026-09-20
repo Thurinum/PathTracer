@@ -1,9 +1,11 @@
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NeoVeldrid;
 using PathTracerApp.Components;
 using PathTracerCore;
 using PathTracerCore.Renderer;
+using PathTracerCore.Renderer.Camera;
 using PathTracerCore.Renderer.Passes;
 using PathTracerCore.Renderer.Primitives;
 using PathTracerCore.Renderer.Shaders;
@@ -11,15 +13,16 @@ using PathTracerCore.Renderer.Shaders;
 namespace PathTracerApp.RenderPasses;
 
 
-public class CirclesRenderPass(ILogger<CirclesRenderPass> logger, SlangCompiler compiler, IOptions<EngineOptions> options, PrimitiveRegistry primitives) : RenderPass(compiler, options)
+public class PlanesRenderPass(CameraState view, ILogger<PlanesRenderPass> logger, SlangCompiler compiler, IOptions<EngineOptions> options, PrimitiveRegistry primitives) : RenderPass(compiler, options)
 {
     private struct Params
     {
         public uint Count;
     }
     
-    protected override string ShaderModule => "circles";
-    
+    protected override string ShaderModule => "planes";
+
+    private DeviceBuffer _cameraBuffer = null!;
     private DeviceBuffer _primitiveBuffer = null!;
     private DeviceBuffer _paramsBuffer = null!;
     private PrimitiveBuffer<CirclePrimitive> _buffer = null!;
@@ -28,8 +31,17 @@ public class CirclesRenderPass(ILogger<CirclesRenderPass> logger, SlangCompiler 
     protected override void SetupResources(GraphicsDevice device)
     {
         _buffer = primitives.Get<CirclePrimitive>();
+
+        BufferDescription cameraDesc = new()
+        {
+            SizeInBytes = (uint)Unsafe.SizeOf<CameraData>(),
+            Usage = BufferUsage.UniformBuffer
+        };
+        _cameraBuffer = device.ResourceFactory.CreateBuffer(cameraDesc);
+        Register("camera", ResourceKind.UniformBuffer, _cameraBuffer);
         
         BuildPrimitivesBuffer(device);
+        Register("planes", ResourceKind.StructuredBufferReadOnly, _primitiveBuffer);
 
         BufferDescription paramsBufferDesc = new()
         {
@@ -37,8 +49,6 @@ public class CirclesRenderPass(ILogger<CirclesRenderPass> logger, SlangCompiler 
             Usage = BufferUsage.UniformBuffer
         };
         _paramsBuffer = device.ResourceFactory.CreateBuffer(paramsBufferDesc);
-        
-        Register("circles", ResourceKind.StructuredBufferReadOnly, _primitiveBuffer);
         Register("params", ResourceKind.UniformBuffer, _paramsBuffer);
     }
 
@@ -57,12 +67,11 @@ public class CirclesRenderPass(ILogger<CirclesRenderPass> logger, SlangCompiler 
     {
         _primitiveBuffer?.Dispose();
         BuildPrimitivesBuffer(device);
-        UpdateBinding("circles", _primitiveBuffer!, device);
+        UpdateBinding("planes", _primitiveBuffer!, device);
     }
     
     protected override void Upload(FrameContext ctx)
     {
-        Params @params = new() { Count = (uint)_buffer.Count };
         if (_bufferVersion != _buffer.CapacityVersion)
         {
             ctx.Device.WaitForIdle();
@@ -81,12 +90,16 @@ public class CirclesRenderPass(ILogger<CirclesRenderPass> logger, SlangCompiler 
         }
         _buffer.ClearDirty();
         
+        Params @params = new() { Count = (uint)_buffer.Count };
         ctx.Cmd.UpdateBuffer(_paramsBuffer, 0, @params);
+
+        ctx.Cmd.UpdateBuffer(_cameraBuffer, 0, view.Data);
     }
 
     protected override void DisposeResources()
     {
         _primitiveBuffer.Dispose();
         _paramsBuffer.Dispose();
+        _cameraBuffer.Dispose();
     }
 }
