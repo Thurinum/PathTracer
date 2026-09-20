@@ -15,13 +15,16 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
 {
     private EngineOptions _options = null!;
     private Shader? _shader;
+    private Texture? _sampleTex;
+    private AccumulationPass? _accumulation;
     private Texture? _outputTex;
     private ResourceLayout? _layout;
     private ResourceSet? _set;
     private Pipeline? _pipeline;
     private (uint x, uint y, uint z) _threadGroupSize;
     private readonly List<ResourceBinding> _bindings = [];
-    
+    protected virtual bool UsesAccumulation => false;
+
     protected abstract string ShaderModule { get; }
 
     protected abstract void SetupResources(GraphicsDevice device);
@@ -45,9 +48,31 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
         CompileShader(device);
         SetupResources(device);
         BuildOutputTexture(device, _options.WindowWidth, _options.WindowHeight);
+        BuildSampleTexture(device, _options.WindowWidth, _options.WindowHeight);
         BuildLayout(device);
         BuildResourceSet(device);
         BuildPipeline(device);
+        if (!UsesAccumulation) return;
+        
+        _accumulation = new AccumulationPass(compiler);
+        _accumulation.Initialize(device, _sampleTex!, _outputTex!);
+    }
+    
+    private void BuildSampleTexture(GraphicsDevice device, uint width, uint height)
+    {
+        _sampleTex?.Dispose();
+        _sampleTex = null;
+        if (!UsesAccumulation) return;
+
+        _sampleTex = device.ResourceFactory.CreateTexture(new TextureDescription
+        {
+            Width = width, Height = height,
+            Depth = 1, MipLevels = 1, ArrayLayers = 1,
+            Format = PixelFormat.R32_G32_B32_A32_Float,
+            Usage = TextureUsage.Sampled | TextureUsage.Storage,
+            Type = TextureType.Texture2D,
+            SampleCount = TextureSampleCount.Count1
+        });
     }
 
     private void BuildLayout(GraphicsDevice device)
@@ -93,7 +118,7 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
 
         var elements = _bindings
             .Select(b => b.Resource)
-            .Prepend(_outputTex)
+            .Prepend(UsesAccumulation ? _sampleTex : _outputTex)
             .ToArray();
         ResourceSetDescription setDesc = new(_layout, elements);
         _set = device.ResourceFactory.CreateResourceSet(setDesc);
@@ -119,27 +144,34 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
     public void Render(FrameContext ctx)
     {
         Upload(ctx);
-        
+
+        _accumulation?.Prepare(ctx.Cmd);
+
         ctx.Cmd.SetPipeline(_pipeline);
         ctx.Cmd.SetComputeResourceSet(0, _set);
-        
-        uint groupCountX = (ctx.Target.Width + _threadGroupSize.x - 1) / _threadGroupSize.x;
-        uint groupCountY = (ctx.Target.Height + _threadGroupSize.y - 1) / _threadGroupSize.y;
+
+        var groupCountX = (ctx.Target.Width + _threadGroupSize.x - 1) / _threadGroupSize.x;
+        var groupCountY = (ctx.Target.Height + _threadGroupSize.y - 1) / _threadGroupSize.y;
         ctx.Cmd.Dispatch(groupCountX, groupCountY, 1);
-        
+
+        _accumulation?.Dispatch(ctx.Cmd, ctx.Target.Width, ctx.Target.Height);
+
         ctx.Cmd.CopyTexture(_outputTex, ctx.Target);
     }
 
     public void Resize(GraphicsDevice device, uint width, uint height)
     {
         BuildOutputTexture(device, width, height);
+        BuildSampleTexture(device, width, height);
         BuildResourceSet(device);
+        _accumulation?.Resize(device, _sampleTex!, _outputTex!);
     }
 
     public void Dispose()
     {
         GC.SuppressFinalize(this);
-        
+        _sampleTex?.Dispose();
+        _accumulation?.Dispose();
         _outputTex?.Dispose();
         _shader?.Dispose();
         DisposeResources();

@@ -22,7 +22,7 @@ ServiceProvider ConfigureServices()
         options.Y = 100;
     }, passes =>
     {
-        passes.Use<CirclesRenderPass>();
+        passes.Use<SpheresRenderPass>();
     });
     services.AddSingleton<App>();
         

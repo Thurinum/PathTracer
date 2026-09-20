@@ -5,6 +5,7 @@ public class SceneObject : IDestroyable
     public required string Name { get; init; }
     public required Scene Owner { get; init; }
     public List<Component> Components { get; } = [];
+    public Transform Transform { get; internal set; } = null!;
     public bool IsPendingDestroy { get; internal set; }
     public bool IsDestroyed { get; private set; }
 
