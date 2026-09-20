@@ -25,12 +25,12 @@ public class PlanesRenderPass(CameraState view, ILogger<PlanesRenderPass> logger
     private DeviceBuffer _cameraBuffer = null!;
     private DeviceBuffer _primitiveBuffer = null!;
     private DeviceBuffer _paramsBuffer = null!;
-    private PrimitiveBuffer<CirclePrimitive> _buffer = null!;
+    private PrimitiveBuffer<PlanePrimitive> _buffer = null!;
     private int _bufferVersion = 0;
     
     protected override void SetupResources(GraphicsDevice device)
     {
-        _buffer = primitives.Get<CirclePrimitive>();
+        _buffer = primitives.Get<PlanePrimitive>();
 
         BufferDescription cameraDesc = new()
         {

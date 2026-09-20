@@ -31,5 +31,7 @@ public class CameraComponent(CameraState view, IOptions<EngineOptions> options) 
             Up = Vector3.Transform(Vector3.UnitY, _transform.Rotation),
             Forward = Vector3.Transform(-Vector3.UnitZ, _transform.Rotation),
         };
+        
+        view.Update(cameraData);
     }
 }
