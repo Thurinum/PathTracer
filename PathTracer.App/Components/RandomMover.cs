@@ -48,6 +48,17 @@ public class RandomMover : Component
             _direction.Y = -MathF.Abs(_direction.Y);
         }
 
+        if (position.Z <= 0f)
+        {
+            position.Z = 0f;
+            _direction.Z = MathF.Abs(_direction.Z);
+        }
+        else if (position.Z >= 1f)
+        {
+            position.Z = 1f;
+            _direction.Z = -MathF.Abs(_direction.Z);
+        }
+
         transform.Position = position;
     }
 }

@@ -52,7 +52,7 @@ public class App(SceneLoop loop, SceneManager sceneManager)
         plane.Width = 2f;
         plane.Height = 2f;
 
-        obj.AddComponent<RandomMover>();
+        // obj.AddComponent<RandomMover>();
     }
 
     private void AddCircle(Scene scene, float r, float x, float y)

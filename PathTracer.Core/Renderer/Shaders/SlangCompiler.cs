@@ -21,10 +21,11 @@ public class SlangCompiler
             Profile = GlobalSession.FindProfile("spirv_1_5")
         };
 
+        string shadersDirectory = Path.Combine(AppContext.BaseDirectory, _options.ShadersDir);
         SessionDescription sessionDescription = new()
         {
             Targets = [target],
-            SearchPaths = ["./"]
+            SearchPaths = [shadersDirectory, "./"]
         };
 
         _session = GlobalSession.CreateSession(sessionDescription);
@@ -37,7 +38,7 @@ public class SlangCompiler
         string source = File.ReadAllText(path);
         Module module = _session.LoadModuleFromSourceString(
             moduleName,
-            fileName,
+            path,
             source,
             out DiagnosticInfo loadDiagnostics);
 

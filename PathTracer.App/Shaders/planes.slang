@@ -1,3 +1,5 @@
+#include "blinn_phong.slang" // module doesnt work for some rfuckign reason
+
 struct Plane 
 {
     float3 Center;
@@ -26,6 +28,8 @@ RWTexture2D<float4> outputImage : register(u0);
 ConstantBuffer<Camera> camera : register(b1);
 StructuredBuffer<Plane> planes : register(t2);
 ConstantBuffer<Params> params : register(b3);
+
+static const float3 SunDir = float3(0.5081, 0.5679, 0.6476);
 
 [shader("compute")]
 [numthreads(8, 8, 1)]
@@ -70,8 +74,15 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID)
     float3 color = float3(0.0);
     if (hit)
     {
-        if (dot(hitN, dir) > 0.0) hitN = -hitN;      // two-sided: face the ray
-        color = 0.5 * (hitN + 1.0);                  // visualize the normal
+        float3 lightCol = float3(0.56f, 0.7f, 0.1f);
+
+        float3 Ng = hitN;                               // geometric normal
+        float3 Nv = dot(Ng, dir) > 0.0 ? -Ng : Ng;      // view-facing, for specular
+        float3 L  = SunDir;
+        float3 V  = -dir;
+
+        color = BlinnPhong(Ng, Nv, L, V, 0.8, 64.0, 0.2);
     }
+
     outputImage[pixel] = float4(color, 1.0);
 }
