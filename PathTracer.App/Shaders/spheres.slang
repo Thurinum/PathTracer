@@ -54,8 +54,18 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID)
     
     float3 color = float3(0.0);
     
-    if (params.Radius > 0.0 && intersectSphere(origin, dir, params.Center, params.Radius, 0.0, 1e30) > 0.0)
-        color = params.Color;
+    float t = intersectSphere(origin, dir, params.Center, params.Radius, 0.0, 1e30); // on est rendu ou sur le rayon
+    if (params.Radius > 0.0 && t > 0.0)
+    {
+        float3 p = origin + t * dir; // obtenir le point sur la surface de la sphere
+        float3 n = normalize(p - params.Center); // la normale est perpendiculaire a la surface
+        
+        if (dot(n, dir) > 0.0)
+            n = -n; // gere le cas ou la camera est derriere la surface (render backfaces)
+        
+        color = n;
+        //color = params.Color;
+    }   
         
     outputImage[pixel] = float4(color, 1.0);
 }
