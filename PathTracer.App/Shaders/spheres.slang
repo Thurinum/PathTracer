@@ -6,7 +6,8 @@ struct Params
 }
 
 RWTexture2D<float4> outputImage : register(u0);
-ConstantBuffer<Params> params : register(b1);
+Texture2D<float4> env : register(t1);
+ConstantBuffer<Params> params : register(b2);
 
 float intersectSphere(float3 origin, float3 dir, float3 center, float radius, float tMin, float tMax) {
     float3 q = origin - center;
@@ -63,9 +64,24 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID)
         if (dot(n, dir) > 0.0)
             n = -n; // gere le cas ou la camera est derriere la surface (render backfaces)
         
-        color = n;
+        color = n * 0.5 + 0.5;
+       
+         
         //color = params.Color;
     }   
+    else 
+    {
+        uint w, h;
+        env.GetDimensions(w, h);
+        
+        float u = 0.5 + atan2(dir.z, dir.x) * (0.5 / 3.14);
+        float v = 0.5 - asin(clamp(dir.y, -1.0, 1.0)) * (1.0 / 3.14);
+        
+        int2 texel = int2(clamp(float2(u, v), 0.0, 0.9999) * float2(w, h));
+        float3 albedo = env.Load(int3(int2(texel), 0)).rgb;
+        
+        color = albedo;
+    }
         
     outputImage[pixel] = float4(color, 1.0);
 }
