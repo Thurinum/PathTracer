@@ -13,13 +13,12 @@ public sealed class RenderBackend : IDisposable
     private readonly GraphicsDevice _device;
     private readonly CommandList _cmd;
     private readonly ImGuiRenderer _imgui;
-    private readonly RenderPass _pass; // TODO: Support multiple passes
+    private readonly RenderGraph _graph;
     public bool Shown => _window.Exists;
 
     public RenderBackend(
         IOptions<EngineOptions> options,
-        RenderPassFactory passFactory,
-        RenderPassSelector passSelector,
+        RenderGraph graph,
         ILogger<RenderBackend> logger)
     {
         var config = options.Value;
@@ -59,8 +58,8 @@ public sealed class RenderBackend : IDisposable
             _window.Width,
             _window.Height);
 
-        // TODO: Render pass type hardcoded
-        _pass = passFactory.CreateRenderPass(passSelector.PassType!, _device);
+        _graph = graph;
+        _graph.AddPasses(_device);
     }
     
     public InputSnapshot GetInput()
@@ -77,7 +76,7 @@ public sealed class RenderBackend : IDisposable
     public void Render()
     {
         FrameContext ctx = new(_device, _cmd, _device.SwapchainFramebuffer.ColorTargets[0].Target);
-        _pass.Render(ctx);
+        _graph.Render(ctx);
     }
 
     public void EndFrame()
@@ -100,7 +99,7 @@ public sealed class RenderBackend : IDisposable
     private void OnWindowResized()
     {
         _device.ResizeMainWindow((uint)_window.Width, (uint)_window.Height);
-        _pass.Resize(_device, (uint)_window.Width, (uint)_window.Height);
+        _graph.Resize(_device, (uint)_window.Width, (uint)_window.Height);
         _imgui.WindowResized(_window.Width, _window.Height);
     }
 
@@ -109,7 +108,7 @@ public sealed class RenderBackend : IDisposable
         _device.WaitForIdle();
         _imgui.Dispose();
         _cmd.Dispose();
-        _pass.Dispose();
+        _graph.Dispose();
         _device.Dispose();
     }
 }

@@ -2,13 +2,13 @@
 
 public sealed class RenderPassSelector
 {
-    internal Type? PassType { get; private set; }
+    internal List<Type> PassTypes { get; } = [];
 
-    public void Use<T>() where T : RenderPass
+    public void Add<T>() where T : RenderPass
     {
         if (typeof(T) == typeof(RenderPass))
             throw new InvalidOperationException("You must subclass RenderPass to create your own.");
-        
-        PassType = typeof(T);
+
+        PassTypes.Add(typeof(T));
     }
 }

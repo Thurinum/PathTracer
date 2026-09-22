@@ -22,14 +22,16 @@ public static class ServiceCollectionExtensions
             configurePasses(passSelector);
             services.AddSingleton(passSelector);
             
-            if (passSelector.PassType == null)
+            if (passSelector.PassTypes.Count == 0)
                 throw new InvalidOperationException("No render pass selected");
             
             services.AddSingleton<SlangCompiler>();
+            services.AddSingleton<RenderPassFactory>();
+            services.AddSingleton<RenderGraph>();
             services.AddSingleton<RenderBackend>();
             services.AddSingleton<CameraState>();
             services.AddSingleton<PrimitiveRegistry>();
-            services.AddSingleton<RenderPassFactory>();
+            
             services.AddSingleton<ComponentFactory>();
             services.AddSingleton<SceneManager>();
             services.AddSingleton<SceneLoop>();

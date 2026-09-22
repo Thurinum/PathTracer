@@ -22,7 +22,7 @@ ServiceProvider ConfigureServices()
         options.Y = 100;
     }, passes =>
     {
-        passes.Use<PlanesRenderPass>();
+        passes.Add<PlanesRenderPass>();
     });
     services.AddSingleton<App>();
         

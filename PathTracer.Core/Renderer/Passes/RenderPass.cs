@@ -10,12 +10,18 @@ public record ResourceBinding
     public required BindableResource Resource;
 }
 
-// TODO: multiple inputs
+public struct TextureDesc
+{
+    public string Name;
+} 
+
 public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions> options) : IDisposable
 {
+    // public abstract TextureDesc[] Inputs { get; } 
+    public Texture? Output { get; private set; }
+    
     private EngineOptions _options = null!;
     private Shader? _shader;
-    private Texture? _outputTex;
     private ResourceLayout? _layout;
     private ResourceSet? _set;
     private Pipeline? _pipeline;
@@ -23,7 +29,7 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
     private readonly List<ResourceBinding> _bindings = [];
     
     protected abstract string ShaderModule { get; }
-
+    
     protected abstract void SetupResources(GraphicsDevice device);
     protected abstract void Upload(FrameContext ctx);
     protected abstract void DisposeResources();
@@ -71,7 +77,7 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
 
     private void BuildOutputTexture(GraphicsDevice device, uint width, uint height)
     {
-        _outputTex?.Dispose();
+        Output?.Dispose();
         TextureDescription colorTargetDesc = new()
         {
             Width = width,
@@ -84,7 +90,7 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
             Type = TextureType.Texture2D,
             SampleCount = TextureSampleCount.Count1
         };
-        _outputTex = device.ResourceFactory.CreateTexture(colorTargetDesc);
+        Output = device.ResourceFactory.CreateTexture(colorTargetDesc);
     }
 
     private void BuildResourceSet(GraphicsDevice device)
@@ -93,7 +99,7 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
 
         var elements = _bindings
             .Select(b => b.Resource)
-            .Prepend(_outputTex)
+            .Prepend(Output)
             .ToArray();
         ResourceSetDescription setDesc = new(_layout, elements);
         _set = device.ResourceFactory.CreateResourceSet(setDesc);
@@ -127,7 +133,7 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
         uint groupCountY = (ctx.Target.Height + _threadGroupSize.y - 1) / _threadGroupSize.y;
         ctx.Cmd.Dispatch(groupCountX, groupCountY, 1);
         
-        ctx.Cmd.CopyTexture(_outputTex, ctx.Target);
+        ctx.Cmd.CopyTexture(Output, ctx.Target);
     }
 
     public void Resize(GraphicsDevice device, uint width, uint height)
@@ -140,7 +146,7 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
     {
         GC.SuppressFinalize(this);
         
-        _outputTex?.Dispose();
+        Output?.Dispose();
         _shader?.Dispose();
         DisposeResources();
         _set?.Dispose();
