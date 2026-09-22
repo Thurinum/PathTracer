@@ -14,11 +14,11 @@ public static class ServiceCollectionExtensions
     {
         public IServiceCollection AddEngineCore(
             Action<EngineOptions> configureOptions,
-            Action<RenderPassSelector> configurePasses)
+            Action<RenderGraphBuilder> configurePasses)
         {
             services.Configure(configureOptions);
             
-            var passSelector = new RenderPassSelector();
+            var passSelector = new RenderGraphBuilder();
             configurePasses(passSelector);
             services.AddSingleton(passSelector);
             

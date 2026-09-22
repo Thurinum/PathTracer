@@ -7,20 +7,18 @@ namespace PathTracerCore.Renderer.Passes;
 public record ResourceBinding
 {
     public required ResourceLayoutElementDescription Desc;
-    public required BindableResource Resource;
+    public BindableResource? Resource;
+    public int InputIndex { get; init; } = -1;
+    public bool IsInput => InputIndex >= 0;
 }
-
-public struct TextureDesc
-{
-    public string Name;
-} 
 
 public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions> options) : IDisposable
 {
-    // public abstract TextureDesc[] Inputs { get; } 
-    public Texture? Output { get; private set; }
+    public virtual string[] Inputs { get; } = [];
+    internal string OutputId => GetType().Name;
+    public Texture[]? BoundInputs { get; internal set; }
+    public Texture? Output { get; internal set; }
     
-    private EngineOptions _options = null!;
     private Shader? _shader;
     private ResourceLayout? _layout;
     private ResourceSet? _set;
@@ -43,14 +41,28 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
         });
     }
 
+    protected void RegisterInput(string name, string inputId, ResourceKind kind = ResourceKind.TextureReadOnly)
+    {
+        int index = Array.IndexOf(Inputs, inputId);
+        if (index < 0)
+            throw new ArgumentException($"Input '{inputId}' is not declared in Inputs.", nameof(inputId));
+
+        _bindings.Add(new ResourceBinding
+        {
+            Desc = new ResourceLayoutElementDescription(name, kind, ShaderStages.Compute),
+            InputIndex = index
+        });
+    }
+
     public void Initialize(GraphicsDevice device)
     {
-        _options = options.Value;
+        if (Output is null)
+            throw new InvalidOperationException($"Pass '{OutputId}' has no output texture bound.");
+
         _bindings.Clear();
 
         CompileShader(device);
         SetupResources(device);
-        BuildOutputTexture(device, _options.WindowWidth, _options.WindowHeight);
         BuildLayout(device);
         BuildResourceSet(device);
         BuildPipeline(device);
@@ -75,34 +87,28 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
         _threadGroupSize = shader.GroupSize;
     }
 
-    private void BuildOutputTexture(GraphicsDevice device, uint width, uint height)
-    {
-        Output?.Dispose();
-        TextureDescription colorTargetDesc = new()
-        {
-            Width = width,
-            Height = height,
-            Depth = 1,
-            MipLevels = 1,
-            ArrayLayers = 1,
-            Format = device.SwapchainFramebuffer.OutputDescription.ColorAttachments[0].Format,
-            Usage = TextureUsage.Sampled | TextureUsage.Storage,
-            Type = TextureType.Texture2D,
-            SampleCount = TextureSampleCount.Count1
-        };
-        Output = device.ResourceFactory.CreateTexture(colorTargetDesc);
-    }
-
     private void BuildResourceSet(GraphicsDevice device)
     {
         _set?.Dispose();
-
+         
         var elements = _bindings
-            .Select(b => b.Resource)
-            .Prepend(Output)
+            .Select(ResolveBinding)
+            .Prepend(Output!)
             .ToArray();
+        
         ResourceSetDescription setDesc = new(_layout, elements);
         _set = device.ResourceFactory.CreateResourceSet(setDesc);
+    }
+
+    private BindableResource ResolveBinding(ResourceBinding binding)
+    {
+        if (!binding.IsInput)
+            return binding.Resource ?? throw new InvalidOperationException($"Binding '{binding.Desc.Name}' has no resource.");
+
+        if (BoundInputs is null)
+            throw new InvalidOperationException($"Binding '{binding.Desc.Name}' needs input '{Inputs[binding.InputIndex]}' but inputs were not bound.");
+
+        return BoundInputs[binding.InputIndex];
     }
     
     protected void UpdateBinding(string name, BindableResource resource, GraphicsDevice device)
@@ -129,8 +135,8 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
         ctx.Cmd.SetPipeline(_pipeline);
         ctx.Cmd.SetComputeResourceSet(0, _set);
         
-        uint groupCountX = (ctx.Target.Width + _threadGroupSize.x - 1) / _threadGroupSize.x;
-        uint groupCountY = (ctx.Target.Height + _threadGroupSize.y - 1) / _threadGroupSize.y;
+        uint groupCountX = (Output!.Width + _threadGroupSize.x - 1) / _threadGroupSize.x;
+        uint groupCountY = (Output.Height + _threadGroupSize.y - 1) / _threadGroupSize.y;
         ctx.Cmd.Dispatch(groupCountX, groupCountY, 1);
         
         ctx.Cmd.CopyTexture(Output, ctx.Target);
@@ -138,7 +144,6 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
 
     public void Resize(GraphicsDevice device, uint width, uint height)
     {
-        BuildOutputTexture(device, width, height);
         BuildResourceSet(device);
     }
 
@@ -146,7 +151,6 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
     {
         GC.SuppressFinalize(this);
         
-        Output?.Dispose();
         _shader?.Dispose();
         DisposeResources();
         _set?.Dispose();

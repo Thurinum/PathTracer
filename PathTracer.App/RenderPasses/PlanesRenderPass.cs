@@ -22,6 +22,9 @@ public class PlanesRenderPass(CameraState view, ILogger<PlanesRenderPass> logger
     
     protected override string ShaderModule => "planes";
 
+    public override string[] Inputs { get; } = [nameof(CirclesRenderPass)];
+
+    private Sampler _sampler;
     private DeviceBuffer _cameraBuffer = null!;
     private DeviceBuffer _primitiveBuffer = null!;
     private DeviceBuffer _paramsBuffer = null!;
@@ -31,6 +34,10 @@ public class PlanesRenderPass(CameraState view, ILogger<PlanesRenderPass> logger
     protected override void SetupResources(GraphicsDevice device)
     {
         _buffer = primitives.Get<PlanePrimitive>();
+
+        _sampler = device.ResourceFactory.CreateSampler(SamplerDescription.Linear);
+        RegisterInput("circles", nameof(CirclesRenderPass));
+        Register("circlesSample", ResourceKind.Sampler, _sampler);
 
         BufferDescription cameraDesc = new()
         {
@@ -98,6 +105,7 @@ public class PlanesRenderPass(CameraState view, ILogger<PlanesRenderPass> logger
 
     protected override void DisposeResources()
     {
+        _sampler.Dispose();
         _primitiveBuffer.Dispose();
         _paramsBuffer.Dispose();
         _cameraBuffer.Dispose();

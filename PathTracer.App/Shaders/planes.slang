@@ -25,9 +25,11 @@ struct Params
 }
 
 RWTexture2D<float4> outputImage : register(u0);
-ConstantBuffer<Camera> camera : register(b1);
-StructuredBuffer<Plane> planes : register(t2);
-ConstantBuffer<Params> params : register(b3);
+Texture2D<float4> circles : register(t1);
+SamplerState circlesSampler : register(s2);
+ConstantBuffer<Camera> camera : register(b3);
+StructuredBuffer<Plane> planes : register(t4);
+ConstantBuffer<Params> params : register(b5);
 
 static const float3 SunDir = float3(0.5081, 0.5679, 0.6476);
 
@@ -52,7 +54,8 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID)
     float bestT = 1e30;
     float3 hitN = 0.0;
     bool hit = false;
-
+    float2 coords = 0.0;
+    
     for (uint i = 0; i < params.Count; ++i)
     {
         Plane p = planes[i];
@@ -69,6 +72,7 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID)
         if (max(abs(a), abs(b)) > 1.0) continue;              // outside the rectangle
     
         bestT = t; hitN = n; hit = true;
+        coords = float2(a, b) * 0.5 + 0.5;
     }
 
     float3 color = float3(0.0);
@@ -81,7 +85,9 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID)
         float3 L  = SunDir;
         float3 V  = -dir;
 
-        color = BlinnPhong(Ng, Nv, L, V, 0.8, 64.0, 0.2);
+        float3 albedo = circles.SampleLevel(circlesSampler, coords, 0.0).xyz;
+        color = albedo * BlinnPhong(Ng, Nv, L, V, 0.8, 64.0, 0.2);
+       
     }
 
     outputImage[pixel] = float4(color, 1.0);
