@@ -1,11 +1,7 @@
-#include "blinn_phong.slang" // module doesnt work for some rfuckign reason
+module PathTracer;
 
-struct Plane 
-{
-    float3 Center;
-    float3 U;
-    float3 V;
-}
+import Primitives;
+import BlinnPhong;
 
 struct Camera
 {
@@ -21,7 +17,8 @@ struct Camera
 
 struct Params
 {
-    uint Count;
+    uint PlaneCount;
+    uint SphereCount;
 }
 
 RWTexture2D<float4> outputImage : register(u0);
@@ -29,7 +26,8 @@ Texture2D<float4> circles : register(t1);
 SamplerState circlesSampler : register(s2);
 ConstantBuffer<Camera> camera : register(b3);
 StructuredBuffer<Plane> planes : register(t4);
-ConstantBuffer<Params> params : register(b5);
+StructuredBuffer<Sphere> spheres : register(t5);
+ConstantBuffer<Params> params : register(b6);
 
 static const float3 SunDir = float3(0.5081, 0.5679, 0.6476);
 
@@ -50,44 +48,37 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID)
 
     float3 origin = camera.Origin;
     float3 dir = normalize(camera.Forward + ndcX * camera.Right + ndcY * camera.Up);
-
+    
     float bestT = 1e30;
-    float3 hitN = 0.0;
-    bool hit = false;
-    float2 coords = 0.0;
+    HitResult bestHit = HitResult.Miss();
     
-    for (uint i = 0; i < params.Count; ++i)
+    for (uint i = 0; i < params.PlaneCount; ++i)
     {
-        Plane p = planes[i];
-        float3 n = normalize(cross(p.U, p.V));
-        float denom = dot(n, dir);
-        if (abs(denom) < 1e-6) continue;                      // parallel
-    
-        float t = dot(n, p.Center - origin) / denom;
-        if (t <= 1e-4 || t >= bestT) continue;                // behind or farther
-    
-        float3 w = origin + t * dir - p.Center;
-        float a = dot(w, p.U) / dot(p.U, p.U);                // U ⟂ V, so this is exact
-        float b = dot(w, p.V) / dot(p.V, p.V);
-        if (max(abs(a), abs(b)) > 1.0) continue;              // outside the rectangle
-    
-        bestT = t; hitN = n; hit = true;
-        coords = float2(a, b) * 0.5 + 0.5;
+        HitResult h = IntersectPlane(origin, dir, planes[i], 1e-4, bestT);
+        if (h.IsHit()) { bestT = h.T; bestHit = h; }
+    }
+    for (uint i = 0; i < params.SphereCount; ++i)
+    {
+        HitResult h = IntersectSphere(origin, dir, spheres[i].Center, spheres[i].Radius, 1e-4, bestT);
+        if (h.IsHit()) { bestT = h.T; bestHit = h; }
     }
 
     float3 color = float3(0.0);
-    if (hit)
+    if (bestHit.IsHit())
     {
         float3 lightCol = float3(0.56f, 0.7f, 0.1f);
 
-        float3 Ng = hitN;                               // geometric normal
-        float3 Nv = dot(Ng, dir) > 0.0 ? -Ng : Ng;      // view-facing, for specular
+        float3 Ng = bestHit.Normal; 
+        float3 Nv = dot(Ng, dir) > 0.0 ? -Ng : Ng; 
         float3 L  = SunDir;
         float3 V  = -dir;
 
-        float3 albedo = circles.SampleLevel(circlesSampler, coords, 0.0).xyz;
+        float3 albedo = circles.SampleLevel(circlesSampler, bestHit.UV, 0.0).xyz;
         color = albedo * BlinnPhong(Ng, Nv, L, V, 0.8, 64.0, 0.2);
-       
+    }
+    else 
+    {
+        color = 0;
     }
 
     outputImage[pixel] = float4(color, 1.0);

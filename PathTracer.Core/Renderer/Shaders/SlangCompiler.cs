@@ -33,14 +33,7 @@ public class SlangCompiler
     
     public CompiledShader CompileComputeShader(string moduleName)
     {
-        string fileName = moduleName + ".slang";
-        string path = Path.Combine(AppContext.BaseDirectory, _options.ShadersDir, fileName);
-        string source = File.ReadAllText(path);
-        Module module = _session.LoadModuleFromSourceString(
-            moduleName,
-            path,
-            source,
-            out DiagnosticInfo loadDiagnostics);
+        Module module = _session.LoadModule(moduleName, out DiagnosticInfo loadDiagnostics);
 
         ThrowIfErrors(loadDiagnostics);
 
@@ -55,14 +48,18 @@ public class SlangCompiler
 
         ThrowIfErrors(componentDiagnostics);
 
-        Memory<byte> code = program.GetEntryPointCode(
+        ComponentType linked = program.Link(out var linkDiagnostics);
+
+        ThrowIfErrors(linkDiagnostics);
+
+        Memory<byte> code = linked.GetEntryPointCode(
             IntPtr.Zero,
             IntPtr.Zero,
             out DiagnosticInfo codeDiagnostics);
 
         ThrowIfErrors(codeDiagnostics);
 
-        ShaderReflection layout = program.GetLayout();
+        ShaderReflection layout = linked.GetLayout();
         EntryPointReflection entry = layout.FindEntryPointByName(EntryPointName);
         var g = entry.GetComputeThreadGroupSize();
 

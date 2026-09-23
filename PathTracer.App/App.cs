@@ -17,10 +17,9 @@ public class App(SceneLoop loop, SceneManager sceneManager)
             .CreateObject(scene, "fpsCounter")
             .AddComponent<FPSCounter>();
             
-        AddSphere(scene, new Vector3(0.0f, 0.0f, -1.0f), 0.5f, Color.Red);
+        AddSphere(scene, new Vector3(2.0f, 0.0f, 0.0f), 1f, Color.Red);
         
         var camera = sceneManager.CreateObject(scene, "camera");
-        camera.AddComponent<Transform>();
         camera.AddComponent<CameraComponent>();
 
         for (int i = 0; i < 100; i++)
@@ -47,7 +46,7 @@ public class App(SceneLoop loop, SceneManager sceneManager)
     private void AddPlane(Scene scene, Vector3 pos, Quaternion rot)
     {
         var obj = sceneManager.CreateObject(scene, "plane");
-        var trans = obj.AddComponent<Transform>();
+        var trans = obj.GetComponent<Transform>();
         trans.Position = pos;
         trans.Rotation = rot;
         

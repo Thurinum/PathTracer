@@ -22,8 +22,9 @@ ServiceProvider ConfigureServices()
         options.Y = 100;
     }, passes =>
     {
-        passes.AddPass<SpheresRenderPass>();
-        passes.AddPass<PlanesRenderPass>();
+        passes.AddPass<CirclesPass>();
+        passes.AddPass<PathTracerPass>();
+        passes.AddPass<AccumulationPass>();
     });
     services.AddSingleton<App>();
         

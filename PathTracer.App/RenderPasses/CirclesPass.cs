@@ -11,14 +11,14 @@ using PathTracerCore.Renderer.Shaders;
 namespace PathTracerApp.RenderPasses;
 
 
-public class CirclesRenderPass(ILogger<CirclesRenderPass> logger, SlangCompiler compiler, IOptions<EngineOptions> options, PrimitiveRegistry primitives) : RenderPass(compiler, options)
+public class CirclesPass(ILogger<CirclesPass> logger, SlangCompiler compiler, IOptions<EngineOptions> options, PrimitiveRegistry primitives) : RenderPass(compiler, options)
 {
     private struct Params
     {
         public uint Count;
     }
     
-    protected override string ShaderModule => "circles";
+    protected override string ShaderModule => "Circles";
     
     private DeviceBuffer _primitiveBuffer = null!;
     private DeviceBuffer _paramsBuffer = null!;
@@ -62,7 +62,7 @@ public class CirclesRenderPass(ILogger<CirclesRenderPass> logger, SlangCompiler 
     
     protected override void Upload(FrameContext ctx)
     {
-        Params @params = new() { Count = (uint)_buffer.Count };
+        Params @params = new() { Count = (uint)_buffer.PathTracerPass };
         if (_bufferVersion != _buffer.CapacityVersion)
         {
             ctx.Device.WaitForIdle();
@@ -72,7 +72,7 @@ public class CirclesRenderPass(ILogger<CirclesRenderPass> logger, SlangCompiler 
             logger.LogInformation($"Primitives buffer was rebuilt to {_primitiveBuffer.SizeInBytes} bytes."); 
         }
         
-        for (int i = 0; i < _buffer.Count; i++)
+        for (int i = 0; i < _buffer.PathTracerPass; i++)
         {
             if (_buffer.IsDirty(i))
             {

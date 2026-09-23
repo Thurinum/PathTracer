@@ -2,9 +2,9 @@
     uint Reset; 
 }
 
-Texture2D<float4> sampleImage : register(t0);
-RWTexture2D<float4> accumImage : register(u1);
-RWTexture2D<float4> outputImage : register(u2);
+RWTexture2D<float4> outputImage : register(u0);
+Texture2D<float4> sampleImage : register(t1);
+RWTexture2D<float4> accumImage : register(u2);
 ConstantBuffer<Params> params : register(b3);
 
 [shader("compute")]

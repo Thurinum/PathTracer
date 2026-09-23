@@ -14,16 +14,16 @@ public class PrimitiveBuffer<T> : IPrimitiveBuffer where T : unmanaged
     private readonly Stack<int> _freeHandles = new();
 
     public Type PrimitiveType => typeof(T);
-    public ReadOnlySpan<T> Data => _primitives.AsSpan(0, Count);
+    public ReadOnlySpan<T> Data => _primitives.AsSpan(0, PathTracerPass);
     public int Capacity => _primitives.Length;
-    public int Count { get; private set; }
+    public int PathTracerPass { get; private set; }
     public uint Stride => (uint)Unsafe.SizeOf<T>();
     public int CapacityVersion { get; private set; }
 
     public PrimitiveHandle Add(in T primitive)
     {
-        EnsureCapacity(Count + 1);
-        int denseIdx = Count++;
+        EnsureCapacity(PathTracerPass + 1);
+        int denseIdx = PathTracerPass++;
 
         int hndlIdx = _freeHandles.Count > 0 ? _freeHandles.Pop() : denseIdx;
         
@@ -54,7 +54,7 @@ public class PrimitiveBuffer<T> : IPrimitiveBuffer where T : unmanaged
             throw new InvalidOperationException("Invalid or outdated primitive handle.");
         
         int denseIdx = _handleIdxToDenseIdx[hndl.Index];
-        int lastIdx = Count - 1;
+        int lastIdx = PathTracerPass - 1;
 
         if (denseIdx != lastIdx)
         {
@@ -65,7 +65,7 @@ public class PrimitiveBuffer<T> : IPrimitiveBuffer where T : unmanaged
             _denseIdxToHandleIdx[denseIdx] = movedHndlIdx;
         }
         
-        Count--;
+        PathTracerPass--;
         _handleIdxToDenseIdx[hndl.Index] = -1;
         _versions[hndl.Index]++;
         _freeHandles.Push(hndl.Index);
@@ -74,7 +74,7 @@ public class PrimitiveBuffer<T> : IPrimitiveBuffer where T : unmanaged
 
     public bool IsDirty(int idx)
     {
-        if (idx < 0 || idx >= Count)
+        if (idx < 0 || idx >= PathTracerPass)
             throw new ArgumentOutOfRangeException(nameof(idx));
         
         return _dirtiness[idx];
@@ -82,12 +82,12 @@ public class PrimitiveBuffer<T> : IPrimitiveBuffer where T : unmanaged
     
     public void MarkAllDirty()
     {
-        Array.Fill(_dirtiness, true, 0, Count);
+        Array.Fill(_dirtiness, true, 0, PathTracerPass);
     }
 
     public void ClearDirty()
     {
-        Array.Clear(_dirtiness, 0, Count);
+        Array.Clear(_dirtiness, 0, PathTracerPass);
     }
 
     private void EnsureCapacity(int cunt)

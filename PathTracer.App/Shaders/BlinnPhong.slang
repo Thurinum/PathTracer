@@ -1,4 +1,4 @@
-module blinn_phong;
+module BlinnPhong;
 
 public float3 BlinnPhongDiffuse(float3 normal, float3 lightDir, float3 albedo)
 {

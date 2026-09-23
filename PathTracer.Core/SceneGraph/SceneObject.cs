@@ -35,10 +35,10 @@ public class SceneObject : IDestroyable
         var components = GetComponents<T>();
         
         if (components.Length == 0)
-            throw new InvalidOperationException($"No component of type {typeof(T)} found on {this}.");
+            throw new InvalidOperationException($"No component of type {typeof(T)} found on '{Name}'.");
         
         if (components.Length > 1)
-            throw new InvalidOperationException($"Multiple components of type {typeof(T)} found on {this}.");
+            throw new InvalidOperationException($"Multiple components of type {typeof(T).Name} found on '{Name}'.");
 
         return components[0];
     }
