@@ -25,7 +25,8 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
     private Pipeline? _pipeline;
     private (uint x, uint y, uint z) _threadGroupSize;
     private readonly List<ResourceBinding> _bindings = [];
-    
+    protected virtual bool UsesAccumulation => false;
+
     protected abstract string ShaderModule { get; }
     
     protected abstract void SetupResources(GraphicsDevice device);
@@ -63,6 +64,7 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
 
         CompileShader(device);
         SetupResources(device);
+        BuildOutputTexture(device, _options.WindowWidth, _options.WindowHeight);
         BuildLayout(device);
         BuildResourceSet(device);
         BuildPipeline(device);
@@ -131,20 +133,25 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
     public void Render(FrameContext ctx)
     {
         Upload(ctx);
-        
+
+        _accumulation?.Prepare(ctx.Cmd);
+
         ctx.Cmd.SetPipeline(_pipeline);
         ctx.Cmd.SetComputeResourceSet(0, _set);
-        
-        uint groupCountX = (Output!.Width + _threadGroupSize.x - 1) / _threadGroupSize.x;
-        uint groupCountY = (Output.Height + _threadGroupSize.y - 1) / _threadGroupSize.y;
+
+        var groupCountX = (Output!.Width + _threadGroupSize.x - 1) / _threadGroupSize.x;
+        var groupCountY = (Output.Height + _threadGroupSize.y - 1) / _threadGroupSize.y;
         ctx.Cmd.Dispatch(groupCountX, groupCountY, 1);
-        
+
+        _accumulation?.Dispatch(ctx.Cmd, ctx.Target.Width, ctx.Target.Height);
+
         ctx.Cmd.CopyTexture(Output, ctx.Target);
     }
 
     public void Resize(GraphicsDevice device, uint width, uint height)
     {
         BuildResourceSet(device);
+        _accumulation?.Resize(device, _sampleTex!, _outputTex!);
     }
 
     public void Dispose()
