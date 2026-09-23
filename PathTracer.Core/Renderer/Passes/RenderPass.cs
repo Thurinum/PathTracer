@@ -24,6 +24,8 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
     private (uint x, uint y, uint z) _threadGroupSize;
     private readonly List<ResourceBinding> _bindings = [];
     protected virtual bool UsesAccumulation => false;
+    protected virtual float TemporalHistoryWeight => 0.0f;
+    protected EngineOptions Options => _options;
 
     protected abstract string ShaderModule { get; }
 
@@ -55,7 +57,9 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
         if (!UsesAccumulation) return;
         
         _accumulation = new AccumulationPass(compiler);
-        _accumulation.Initialize(device, _sampleTex!, _outputTex!);
+        Texture guide = GetTextureBinding("guide");
+        Texture motion = GetTextureBinding("motion");
+        _accumulation.Initialize(device, _sampleTex!, guide, motion, _outputTex!);
     }
     
     private void BuildSampleTexture(GraphicsDevice device, uint width, uint height)
@@ -136,6 +140,12 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
         BuildResourceSet(device);
     }
 
+    protected Texture GetTextureBinding(string name)
+    {
+        return _bindings.First(b => b.Desc.Name == name).Resource as Texture
+               ?? throw new InvalidOperationException($"Binding '{name}' is not a texture.");
+    }
+
     private void BuildPipeline(GraphicsDevice device)
     {
         ComputePipelineDescription pipelineDesc = new(_shader, _layout, _threadGroupSize.x, _threadGroupSize.y, _threadGroupSize.z); _pipeline = device.ResourceFactory.CreateComputePipeline(pipelineDesc);
@@ -145,7 +155,7 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
     {
         Upload(ctx);
 
-        _accumulation?.Prepare(ctx.Cmd);
+        _accumulation?.Prepare(ctx.Cmd, TemporalHistoryWeight);
 
         ctx.Cmd.SetPipeline(_pipeline);
         ctx.Cmd.SetComputeResourceSet(0, _set);
@@ -161,11 +171,17 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
 
     public void Resize(GraphicsDevice device, uint width, uint height)
     {
+        ResizeResources(device, width, height);
         BuildOutputTexture(device, width, height);
         BuildSampleTexture(device, width, height);
         BuildResourceSet(device);
-        _accumulation?.Resize(device, _sampleTex!, _outputTex!);
+        if (_accumulation is not null)
+        {
+            _accumulation.Resize(device, _sampleTex!, GetTextureBinding("guide"), GetTextureBinding("motion"), _outputTex!);
+        }
     }
+
+    protected virtual void ResizeResources(GraphicsDevice device, uint width, uint height) { }
 
     public void Dispose()
     {
