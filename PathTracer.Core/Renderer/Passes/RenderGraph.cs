@@ -45,6 +45,8 @@ public class RenderGraph(RenderPassFactory factory, RenderGraphBuilder graphBuil
         {
             pass.Render(ctx);
         }
+        
+        ctx.Cmd.CopyTexture(_passes[^1].Output, ctx.Target);
     }
 
     public void Resize(GraphicsDevice device, uint width, uint height)

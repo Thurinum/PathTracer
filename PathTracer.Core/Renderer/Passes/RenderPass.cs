@@ -138,8 +138,6 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
         var groupCountX = (Output!.Width + _threadGroupSize.x - 1) / _threadGroupSize.x;
         var groupCountY = (Output.Height + _threadGroupSize.y - 1) / _threadGroupSize.y;
         ctx.Cmd.Dispatch(groupCountX, groupCountY, 1);
-
-        ctx.Cmd.CopyTexture(Output, ctx.Target);
     }
 
     public virtual void Resize(GraphicsDevice device, uint width, uint height)
