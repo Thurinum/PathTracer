@@ -15,6 +15,7 @@ public class SceneManager(ComponentFactory componentFactory)
             Name = name
         };
         scene.Objects.Add(obj);
+        obj.Transform = obj.AddComponent<Transform>();
         return obj;
     }
 

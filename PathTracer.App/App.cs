@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using PathTracerApp.Components;
+using PathTracerCore.Renderer;
 using PathTracerCore.SceneGraph;
 
 namespace PathTracerApp;
@@ -13,21 +14,28 @@ public class App(SceneLoop loop, SceneManager sceneManager)
         sceneManager
             .CreateObject(scene, "fpsCounter")
             .AddComponent<FPSCounter>();
-
-        for (int i = 0; i < 1000; i++)
-        {
-            AddCircle(scene, Random.Shared.NextSingle() * (150 - 50), Random.Shared.NextSingle(), Random.Shared.NextSingle());
-        }
         
+        AddSphere(scene, new Vector3(0.0f, 0.0f, -1.0f), 0.5f, Color.Red);
+
         loop.Run(scene);
     }
+    
+    private void AddSphere(Scene scene, Vector3 position, float radius, Color color)
+    {
+        var obj = sceneManager.CreateObject(scene, "sphere");
 
+        obj.Transform.Position = position;
+
+        var sphere = obj.AddComponent<SphereComponent>();
+        sphere.Radius = radius;
+        sphere.Color = color;
+    }
+    
     private void AddCircle(Scene scene, float r, float x, float y)
     {
         var obj = sceneManager.CreateObject(scene, "circle");
 
-        var trans = obj.AddComponent<Transform>();
-        trans.Position = new Vector3(x, y, 0.0f);
+        obj.Transform.Position = new Vector3(x, y, 0.0f);
         
         var circle = obj.AddComponent<CircleComponent>();
         circle.Radius = r;
