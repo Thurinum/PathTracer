@@ -2,7 +2,7 @@
 using ImGuiNET;
 using PathTracerCore.SceneGraph;
 
-namespace PathTracerApp.Components;
+namespace PathTracerApp.Components.GUI;
 
 public class FPSCounter : Component
 {

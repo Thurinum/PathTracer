@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using PathTracerApp.Components;
+using PathTracerApp.Components.GUI;
 using PathTracerCore;
 using PathTracerCore.Renderer.Camera;
 using PathTracerCore.Renderer;
@@ -21,18 +22,16 @@ public class App(SceneLoop loop, SceneManager sceneManager)
         
         var camera = sceneManager.CreateObject(scene, "camera");
         camera.AddComponent<CameraComponent>();
+        var t = camera.GetComponent<Transform>();
+        t.Position = new Vector3(0, 5, 10);
 
         for (int i = 0; i < 100; i++)
         {
             AddCircle(scene, Random.Shared.NextSingle() * (150 - 50), Random.Shared.NextSingle(), Random.Shared.NextSingle());
         }
 
-        var orbit = camera.AddComponent<OrbitCameraComponent>();
-        orbit.Target = Vector3.Zero;
-        orbit.Distance = 4f;
-        orbit.ElevationDegrees = 20f;
-        orbit.AzimuthDegrees = 0f;
-        orbit.OrbitSpeedDegreesPerSecond = 0f;   // 0 = static; 30 = auto-orbit
+        var orbit = camera.AddComponent<CameraControls>();
+        orbit.Target = new Vector3(2,0,0);
         
         AddPlane(scene, new Vector3( 0, -1,  0), Quaternion.FromEuler(new Vector3(-90,   0,  0))); // floor  +Y
         AddPlane(scene, new Vector3( 0,  1,  0), Quaternion.FromEuler(new Vector3( 90,   0,  0))); // ceil   -Y
