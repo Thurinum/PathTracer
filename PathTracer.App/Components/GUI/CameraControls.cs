@@ -12,6 +12,7 @@ public class CameraControls : Component
     public float Distance { get; set; } = 5.0f;
     public float AzimuthDegrees { get; set; } = 0.0f;
     public float ElevationDegrees { get; set; }
+    public float Speed { get; set; } = 1;
 
     public override void Awake()
     {
@@ -20,9 +21,12 @@ public class CameraControls : Component
 
     public override void Update(float deltaTime)
     {
+        AzimuthDegrees += Speed * deltaTime;
+        
         float a = MathF.PI / 180.0f * AzimuthDegrees;
         float e = MathF.PI / 180.0f * ElevationDegrees;
         
+        // unit circle
         Vector3 dir = new(
             MathF.Cos(e) * MathF.Sin(a), 
             MathF.Sin(e), 
@@ -55,6 +59,10 @@ public class CameraControls : Component
         float distance = Distance;
         if (ImGui.SliderFloat("Distance", ref distance, 1, 10))
             Distance = distance;
+        
+        float speed = Speed;
+        if (ImGui.SliderFloat("Speed", ref speed, -250, 250))
+            Speed = speed;
 
         ImGui.End();
     }
