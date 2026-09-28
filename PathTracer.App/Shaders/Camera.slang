@@ -18,9 +18,9 @@ public struct Ray
     public float3 Direction;
 }
 
-public Ray BuildPrimaryRay(Camera camera, uint2 pixel, uint2 frameSize)
+public Ray BuildPrimaryRay(Camera camera, uint2 pixel, uint2 frameSize, float2 jitter)
 {
-    float2 screenUV  = (float2(pixel) + 0.5) / float2(frameSize);
+    float2 screenUV  = (float2(pixel) + jitter) / float2(frameSize);
     float viewPlaneX = (2.0 * screenUV.x - 1.0) * camera.Aspect * camera.TanHalfFov;
     float viewPlaneY = (1.0 - 2.0 * screenUV.y) * camera.TanHalfFov;
     

@@ -18,12 +18,15 @@ public class PathTracerPass(CameraState view, ILogger<PathTracerPass> logger, Sl
     {
         public uint PlaneCount;
         public uint SphereCount;
+        public uint Seed;
+        public uint SamplesPerPixel;
     }
-    
+
     protected override string ShaderModule => "PathTracer";
 
     public override string[] Inputs { get; } = [nameof(CirclesPass)];
 
+    private uint _seed;
     private Sampler _sampler = null!;
     private DeviceBuffer _cameraBuffer = null!;
     private DeviceBuffer _planesBuffer = null!;
@@ -100,7 +103,9 @@ public class PathTracerPass(CameraState view, ILogger<PathTracerPass> logger, Sl
         Params @params = new()
         {
             PlaneCount = (uint)_planes.PathTracerPass,
-            SphereCount = (uint)_spheres.PathTracerPass
+            SphereCount = (uint)_spheres.PathTracerPass,
+            Seed = _seed++,
+            SamplesPerPixel = options.Value.SamplesPerPixel
         };
         ctx.Cmd.UpdateBuffer(_paramsBuffer, 0, @params);
 

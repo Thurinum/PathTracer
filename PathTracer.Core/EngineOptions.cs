@@ -10,4 +10,6 @@ public sealed class EngineOptions
     
     public bool VSync = true;
     public string ShadersDir = "Shaders";
+    
+    public uint SamplesPerPixel = 4;
 }
