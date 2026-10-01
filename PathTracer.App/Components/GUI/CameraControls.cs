@@ -1,5 +1,6 @@
 using System.Numerics;
 using ImGuiNET;
+using PathTracerCore.Renderer.Camera;
 using PathTracerCore.SceneGraph;
 
 namespace PathTracerApp.Components.GUI;
@@ -7,6 +8,7 @@ namespace PathTracerApp.Components.GUI;
 public class CameraControls : Component
 {
     private Transform _transform = null!;
+    private CameraComponent _camera = null!;
     
     public Vector3 Target { get; set; } = Vector3.Zero;
     public float Distance { get; set; } = 5.0f;
@@ -17,6 +19,7 @@ public class CameraControls : Component
     public override void Awake()
     {
         _transform = Parent.GetComponent<Transform>();
+        _camera = Parent.GetComponent<CameraComponent>();
     }
 
     public override void Update(float deltaTime)
@@ -63,6 +66,14 @@ public class CameraControls : Component
         float speed = Speed;
         if (ImGui.SliderFloat("Speed", ref speed, -250, 250))
             Speed = speed;
+
+        float focusDistance = _camera.FocusDistance;
+        if (ImGui.SliderFloat("Focus Distance", ref focusDistance, 0.0f, 20.0f))
+            _camera.FocusDistance = focusDistance;
+
+        float apertureRadius = _camera.ApertureRadius;
+        if (ImGui.SliderFloat("Aperture Radius", ref apertureRadius, 0.0f, 0.5f))
+            _camera.ApertureRadius = apertureRadius;
 
         ImGui.End();
     }

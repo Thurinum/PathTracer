@@ -8,6 +8,8 @@ public class CameraComponent(CameraState view, IOptions<EngineOptions> options) 
 {
     private Transform _transform = null!;
     public float FovDegrees { get; } = 67.0f;
+    public float FocusDistance = 5.0f;
+    public float ApertureRadius = 0.15f;
 
     public override void Awake()
     {
@@ -25,6 +27,8 @@ public class CameraComponent(CameraState view, IOptions<EngineOptions> options) 
             Origin = _transform.Position,
             AspectRatio = aspectRatio,
             TanHalfFOV = tanHalfFovRad,
+            ApertureRadius = ApertureRadius,
+            FocusDistance = FocusDistance,
             
             // +X right, +Y up, -Z forward, right-handed 
             Right = Vector3.Transform(Vector3.UnitX, _transform.Rotation),

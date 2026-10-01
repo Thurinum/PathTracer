@@ -69,7 +69,7 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID)
     for (uint k = 0; k < params.SamplesPerPixel; ++k)
     {
         float2 jitter = float2(rng.Next(), rng.Next());
-        float3 C = Trace(BuildPrimaryRay(camera, pixel, frameSize, jitter));
+        float3 C = Trace(BuildPrimaryRay(camera, rng, pixel, frameSize, jitter));
         accum.Add(C);
     }
 
