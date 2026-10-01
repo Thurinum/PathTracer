@@ -29,7 +29,7 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<RenderPassFactory>();
             services.AddSingleton<RenderGraph>();
             services.AddSingleton<RenderBackend>();
-            services.AddSingleton<CameraState>();
+            services.AddSingleton<RenderData<CameraData>>();
             services.AddSingleton<PrimitiveRegistry>();
             
             services.AddSingleton<ComponentFactory>();

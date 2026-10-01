@@ -12,7 +12,7 @@ using PathTracerCore.Renderer.Shaders;
 
 namespace PathTracerApp.RenderPasses;
 
-public class PathTracerPass(CameraState view, ILogger<PathTracerPass> logger, SlangCompiler compiler, IOptions<EngineOptions> options, PrimitiveRegistry primitives) : RenderPass(compiler, options)
+public class PathTracerPass(RenderData<CameraData> view, ILogger<PathTracerPass> logger, SlangCompiler compiler, IOptions<EngineOptions> options, PrimitiveRegistry primitives) : RenderPass(compiler, options)
 {
     private struct Params
     {
