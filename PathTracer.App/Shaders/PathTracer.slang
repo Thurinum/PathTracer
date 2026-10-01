@@ -1,10 +1,10 @@
 module PathTracer;
 
 import Primitives;
-import BlinnPhong;
 import Camera;
 import Random;
 import Accumulation;
+import Environment;
 
 struct Params
 {
@@ -22,8 +22,6 @@ StructuredBuffer<Plane> planes : register(t4);
 StructuredBuffer<Sphere> spheres : register(t5);
 ConstantBuffer<Params> params : register(b6);
 
-static const float3 SunDir = float3(0.5081, 0.5679, 0.6476);
-
 float3 Trace(Ray ray)
 {
     float bestT = 1e30;
@@ -40,16 +38,14 @@ float3 Trace(Ray ray)
         if (h.IsHit()) { bestT = h.T; bestHit = h; }
     }
 
-    if (!bestHit.IsHit())
-        return float3(0.0);
-
-    float3 Ng = bestHit.Normal;
-    float3 Nv = dot(Ng, ray.Direction) > 0.0 ? -Ng : Ng;
-    float3 L  = SunDir;
-    float3 V  = -ray.Direction;
-
-    float3 albedo = circles.SampleLevel(circlesSampler, bestHit.UV, 0.0).xyz;
-    return albedo * BlinnPhong(Ng, Nv, L, V, 0.8, 64.0, 0.2);
+    if (bestHit.IsHit())
+    {
+        return circles.SampleLevel(circlesSampler, bestHit.UV, 0.0).xyz;
+    }
+    else
+    {
+        return Sky(ray.Direction);
+    }
 }
 
 [shader("compute")]
