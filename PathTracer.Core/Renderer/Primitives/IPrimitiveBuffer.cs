@@ -1,4 +1,6 @@
-﻿namespace PathTracerCore.Renderer.Primitives;
+﻿using PathTracerCore.Bvh;
+
+namespace PathTracerCore.Renderer.Primitives;
 
 public interface IPrimitiveBuffer
 {
@@ -6,4 +8,7 @@ public interface IPrimitiveBuffer
     int Capacity { get; }
     int PathTracerPass { get; }
     uint Stride { get; }
+    uint Revision { get; }
+    
+    void AppendBvhPrimitives(List<BvhPrimitiveRef> destination);
 }

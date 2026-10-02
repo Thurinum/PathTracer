@@ -1,16 +1,33 @@
 ﻿using System.Numerics;
 using System.Runtime.InteropServices;
+using PathTracerCore.Bvh;
 using PathTracerCore.SceneGraph;
 
 namespace PathTracerApp.Components;
 
 [StructLayout(LayoutKind.Explicit, Size = 48)]
-public record struct PlanePrimitive
+public record struct PlanePrimitive : IBvhReady
 {
     [FieldOffset(00)] public Vector3 Point;
     [FieldOffset(16)] public Vector3 ExtentX;
     [FieldOffset(32)] public Vector3 ExtentY;
-}   
+
+    public uint BvhType => 0;
+
+    public AxisAlignedBoundingBox BvhBounds
+    {
+        get
+        {
+            var p0 = Point - ExtentX - ExtentY;
+            var p1 = Point + ExtentX - ExtentY;
+            var p2 = Point - ExtentX + ExtentY;
+            var p3 = Point + ExtentX + ExtentY;
+
+            return AxisAlignedBoundingBox.Empty
+                .Include(p0).Include(p1).Include(p2).Include(p3);
+        }
+    }
+}
 
 public class PlaneComponent : RendererBase<PlanePrimitive>
 {

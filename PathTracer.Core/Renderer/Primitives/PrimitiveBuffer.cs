@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using PathTracerCore.Bvh;
 
 namespace PathTracerCore.Renderer.Primitives;
 
@@ -19,6 +20,21 @@ public class PrimitiveBuffer<T> : IPrimitiveBuffer where T : unmanaged
     public int PathTracerPass { get; private set; }
     public uint Stride => (uint)Unsafe.SizeOf<T>();
     public int CapacityVersion { get; private set; }
+    public uint Revision { get; private set; }
+    
+    public void AppendBvhPrimitives(List<BvhPrimitiveRef> destination)
+    {
+        for (uint index = 0; index < PathTracerPass; index++)
+        {
+            if (_primitives[(int)index] is not IBvhReady bounded)
+                continue;
+
+            destination.Add(new BvhPrimitiveRef(
+                bounded.BvhType,
+                index,
+                bounded.BvhBounds));
+        }
+    }
 
     public PrimitiveHandle Add(in T primitive)
     {
@@ -31,7 +47,8 @@ public class PrimitiveBuffer<T> : IPrimitiveBuffer where T : unmanaged
         _dirtiness[denseIdx] = true;
         _handleIdxToDenseIdx[hndlIdx] = denseIdx;
         _denseIdxToHandleIdx[denseIdx] = hndlIdx;
-        
+
+        Revision++;
         return new PrimitiveHandle(hndlIdx, _versions[hndlIdx]);
     }
 
@@ -46,6 +63,7 @@ public class PrimitiveBuffer<T> : IPrimitiveBuffer where T : unmanaged
         
         _primitives[denseIdx] = primitive;
         _dirtiness[denseIdx] = true;
+        Revision++;
     }
 
     public void Remove(ref PrimitiveHandle hndl)
@@ -68,6 +86,7 @@ public class PrimitiveBuffer<T> : IPrimitiveBuffer where T : unmanaged
         PathTracerPass--;
         _handleIdxToDenseIdx[hndl.Index] = -1;
         _versions[hndl.Index]++;
+        Revision++;
         _freeHandles.Push(hndl.Index);
         hndl = PrimitiveHandle.Invalid;
     }

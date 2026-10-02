@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using NeoVeldrid;
 using PathTracerApp.Components;
 using PathTracerCore;
+using PathTracerCore.Bvh;
 using PathTracerCore.Renderer;
 using PathTracerCore.Renderer.Camera;
 using PathTracerCore.Renderer.Passes;
@@ -12,7 +13,14 @@ using PathTracerCore.Renderer.Shaders;
 
 namespace PathTracerApp.RenderPasses;
 
-public class PathTracerPass(CameraState view, ILogger<PathTracerPass> logger, SlangCompiler compiler, IOptions<EngineOptions> options, PrimitiveRegistry primitives) : RenderPass(compiler, options)
+public class PathTracerPass(
+    CameraState view,
+    ILogger<PathTracerPass> logger,
+    SlangCompiler compiler,
+    IOptions<EngineOptions> options,
+    PrimitiveRegistry primitives,
+    SceneBvh sceneBvh
+    ) : RenderPass(compiler, options)
 {
     private struct Params
     {
@@ -99,6 +107,11 @@ public class PathTracerPass(CameraState view, ILogger<PathTracerPass> logger, Sl
     {
         UploadPlanes(ctx);
         UploadSpheres(ctx);
+
+        if (sceneBvh.IsDirty)
+        {
+            sceneBvh.Rebuild();
+        }
 
         Params @params = new()
         {

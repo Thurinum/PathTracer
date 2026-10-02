@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using PathTracerCore.Bvh;
 using PathTracerCore.Renderer;
 using PathTracerCore.Renderer.Camera;
 using PathTracerCore.Renderer.Passes;
@@ -31,6 +32,7 @@ public static class ServiceCollectionExtensions
             services.AddSingleton<RenderBackend>();
             services.AddSingleton<CameraState>();
             services.AddSingleton<PrimitiveRegistry>();
+            services.AddSingleton<SceneBvh>();
             
             services.AddSingleton<ComponentFactory>();
             services.AddSingleton<SceneManager>();
