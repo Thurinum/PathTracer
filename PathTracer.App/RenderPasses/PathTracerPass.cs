@@ -103,8 +103,8 @@ public class PathTracerPass(RenderData<CameraData> view, ILogger<PathTracerPass>
 
         Params @params = new()
         {
-            PlaneCount = (uint)_planes.PathTracerPass,
-            SphereCount = (uint)_spheres.PathTracerPass,
+            PlaneCount = (uint)_planes.Count,
+            SphereCount = (uint)_spheres.Count,
             Seed = _seed++,
             SamplesPerPixel = options.Value.SamplesPerPixel,
             MaxBounces = options.Value.MaxBounces
@@ -125,7 +125,7 @@ public class PathTracerPass(RenderData<CameraData> view, ILogger<PathTracerPass>
             logger.LogInformation($"Primitives buffer was rebuilt to {_planesBuffer.SizeInBytes} bytes."); 
         }
         
-        for (int i = 0; i < _planes.PathTracerPass; i++)
+        for (int i = 0; i < _planes.Count; i++)
         {
             if (_planes.IsDirty(i))
             {
@@ -146,7 +146,7 @@ public class PathTracerPass(RenderData<CameraData> view, ILogger<PathTracerPass>
             logger.LogInformation($"Primitives buffer was rebuilt to {_spheresBuffer.SizeInBytes} bytes."); 
         }
         
-        for (int i = 0; i < _spheres.PathTracerPass; i++)
+        for (int i = 0; i < _spheres.Count; i++)
         {
             if (_spheres.IsDirty(i))
             {

@@ -4,6 +4,6 @@ public interface IPrimitiveBuffer
 {
     Type PrimitiveType { get; }
     int Capacity { get; }
-    int PathTracerPass { get; }
+    int Count { get; }
     uint Stride { get; }
 }

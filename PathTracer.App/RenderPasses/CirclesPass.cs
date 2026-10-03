@@ -62,7 +62,7 @@ public class CirclesPass(ILogger<CirclesPass> logger, SlangCompiler compiler, IO
     
     protected override void Upload(FrameContext ctx)
     {
-        Params @params = new() { Count = (uint)_buffer.PathTracerPass };
+        Params @params = new() { Count = (uint)_buffer.Count };
         if (_bufferVersion != _buffer.CapacityVersion)
         {
             ctx.Device.WaitForIdle();
@@ -72,7 +72,7 @@ public class CirclesPass(ILogger<CirclesPass> logger, SlangCompiler compiler, IO
             logger.LogInformation($"Primitives buffer was rebuilt to {_primitiveBuffer.SizeInBytes} bytes."); 
         }
         
-        for (int i = 0; i < _buffer.PathTracerPass; i++)
+        for (int i = 0; i < _buffer.Count; i++)
         {
             if (_buffer.IsDirty(i))
             {
