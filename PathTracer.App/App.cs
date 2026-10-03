@@ -18,6 +18,10 @@ public class App(SceneLoop loop, SceneManager sceneManager)
             .CreateObject(scene, "fpsCounter")
             .AddComponent<FPSCounter>();
 
+        sceneManager
+            .CreateObject(scene, "youssefAimePasTemporalAccumFix")
+            .AddComponent<RenderSettingsComponent>();
+
         AddSphere(scene, new Vector3(2.0f, -100.5f, 0.0f), 100.0f, new Color(0.6f, 0.6f, 0.6f));
         AddSphere(scene, new Vector3(2.0f, 0.2f, 0.0f), 0.7f, new Color(0.9f, 0.6f, 0.2f));
         AddSphere(scene, new Vector3(1.3f, -0.3f, 0.9f), 0.2f, new Color(0.2f, 0.6f, 0.9f));

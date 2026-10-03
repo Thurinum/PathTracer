@@ -26,6 +26,7 @@ ServiceProvider ConfigureServices()
     {
         passes.AddPass<CirclesPass>();
         passes.AddPass<PathTracerPass>();
+        passes.AddPass<TemporalAccumulationPass>();
     });
     services.AddSingleton<App>();
         
