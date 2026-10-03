@@ -8,7 +8,7 @@ using PathTracerCore.Renderer.Shaders;
 
 namespace PathTracerApp.RenderPasses;
 
-public class TemporalAccumulationPass(SlangCompiler compiler, CameraState camera, IOptions<EngineOptions> options) : RenderPass(compiler, options)
+public class TemporalAccumulationPass(SlangCompiler compiler, RenderData<CameraData> camera, IOptions<EngineOptions> options) : RenderPass(compiler, options)
 {
     private struct Params
     {
