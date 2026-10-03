@@ -16,6 +16,7 @@ public abstract class RenderPass(SlangCompiler compiler, IOptions<EngineOptions>
 {
     public virtual string[] Inputs { get; } = [];
     internal string OutputId => GetType().Name;
+    public bool Enabled { get; set; } = true;
     public Texture[]? BoundInputs { get; internal set; }
     public Texture? Output { get; internal set; }
     

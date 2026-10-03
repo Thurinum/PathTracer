@@ -41,12 +41,24 @@ public class RenderGraph(RenderPassFactory factory, RenderGraphBuilder graphBuil
 
     public void Render(FrameContext ctx)
     {
+        RenderPass? lastRenderedPass = null;
+        
         foreach (var pass in _passes)
         {
-            pass.Render(ctx);
+            if (pass.Enabled)
+            {
+                pass.Render(ctx);
+                lastRenderedPass = pass;
+            }
         }
-        
-        ctx.Cmd.CopyTexture(_passes[^1].Output, ctx.Target);
+
+        if (lastRenderedPass != null)
+            ctx.Cmd.CopyTexture(lastRenderedPass.Output, ctx.Target);
+    }
+
+    public T? GetPass<T>() where T : RenderPass
+    {
+        return _passes.OfType<T>().FirstOrDefault();
     }
 
     public void Resize(GraphicsDevice device, uint width, uint height)
