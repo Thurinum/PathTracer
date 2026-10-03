@@ -5,18 +5,20 @@ using PathTracerCore.SceneGraph;
 
 namespace PathTracerApp.Components;
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Explicit, Size = 48)]
 public record struct SpherePrimitive
 {
-    public Vector3 Center;
-    public float Radius;
-    public Color Color;
+    [FieldOffset(00)] public Vector3 Center;
+    [FieldOffset(12)] public float Radius;
+    [FieldOffset(16)] public Color Albedo;
+    [FieldOffset(32)] public Color Emission;
 }
 
 public class SphereComponent : RendererBase<SpherePrimitive>
 {
     public float Radius { get; set; } = 1.0f;
-    public Color Color { get; set; } = Color.Red;
+    public Color Albedo { get; set; } = new(0.5f, 0.5f, 0.5f);
+    public Color Emission { get; set; }
 
     protected override SpherePrimitive BuildPrimitive()
     {
@@ -24,7 +26,8 @@ public class SphereComponent : RendererBase<SpherePrimitive>
         {
             Center = Parent.Transform.Position,
             Radius = Radius,
-            Color = Color
+            Albedo = Albedo,
+            Emission = Emission
         };
     }
 }
