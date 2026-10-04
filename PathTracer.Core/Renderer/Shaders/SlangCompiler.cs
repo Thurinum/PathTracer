@@ -3,7 +3,7 @@ using Prowl.Slang;
 
 namespace PathTracerCore.Renderer.Shaders;
 
-public readonly record struct CompiledShader(byte[] Code, (uint x, uint y, uint z) GroupSize);
+public readonly record struct ShaderCompilationResult(byte[] Code, (uint x, uint y, uint z) GroupSize);
 
 public class SlangCompiler
 {
@@ -31,7 +31,7 @@ public class SlangCompiler
         _session = GlobalSession.CreateSession(sessionDescription);
     }
     
-    public CompiledShader CompileComputeShader(string moduleName)
+    public ShaderCompilationResult CompileComputeShader(string moduleName)
     {
         Module module = _session.LoadModule(moduleName, out DiagnosticInfo loadDiagnostics);
 
@@ -63,7 +63,7 @@ public class SlangCompiler
         EntryPointReflection entry = layout.FindEntryPointByName(EntryPointName);
         var g = entry.GetComputeThreadGroupSize();
 
-        return new CompiledShader(code.ToArray(), g);
+        return new ShaderCompilationResult(code.ToArray(), g);
     }
 
     private static void ThrowIfErrors(DiagnosticInfo diagnostics)
