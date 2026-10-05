@@ -52,11 +52,15 @@ public sealed class RenderGraph(
         _resources.Allocate(device, framebuffer.Width, framebuffer.Height);
         
         // check for a valid present texture
+        // TODO: can be simplified, Has() could be made spec only
         if (graphBuilder.PresentTextureName == null)
             throw new InvalidOperationException("No present texture is set.");
         
         if (!_resources.Has<Texture>(graphBuilder.PresentTextureName))
             throw new InvalidOperationException($"Present texture {graphBuilder.PresentTextureName} isn't a valid resource.");
+        
+        if (_resources.GetTexture(graphBuilder.PresentTextureName).Format != framebuffer.ColorTargets[0].Target.Format)
+            throw new InvalidOperationException($"Present tex {graphBuilder.PresentTextureName} must have same format as the swapchain.");
         
         // check that inputs are valid
         foreach (var entry in _passes)
