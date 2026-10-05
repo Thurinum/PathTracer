@@ -1,92 +1,36 @@
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NeoVeldrid;
 using PathTracerApp.Components;
-using PathTracerCore;
-using PathTracerCore.Renderer;
 using PathTracerCore.Renderer.Graph;
 using PathTracerCore.Renderer.Primitives;
 using PathTracerCore.Renderer.Resources;
 
 namespace PathTracerApp.RenderPasses;
 
-
-public class CirclesPass(ILogger<CirclesPass> logger, SlangCompiler compiler, IOptions<EngineOptions> options, PrimitiveRegistry primitives) : RenderPass(options)
+public sealed class CirclesPass(PrimitiveRegistry primitives) : RenderPass
 {
     private struct Params
     {
         public uint Count;
     }
-    
-    protected override string ShaderModule => "Circles";
-    
-    private DeviceBuffer _primitiveBuffer = null!;
-    private DeviceBuffer _paramsBuffer = null!;
-    private PrimitiveBuffer<CirclePrimitive> _buffer = null!;
-    private int _bufferVersion = 0;
-    
-    protected override void SetupResources(GraphicsDevice device)
-    {
-        _buffer = primitives.Get<CirclePrimitive>();
-        
-        BuildPrimitivesBuffer(device);
 
-        BufferDescription paramsBufferDesc = new()
-        {
-            SizeInBytes = 16,
-            Usage = BufferUsage.UniformBuffer
-        };
-        _paramsBuffer = device.ResourceFactory.CreateBuffer(paramsBufferDesc);
-        
-        Register("circles", ResourceKind.StructuredBufferReadOnly, _primitiveBuffer);
-        Register("params", ResourceKind.UniformBuffer, _paramsBuffer);
-    }
+    private readonly PrimitiveBuffer<CirclePrimitive> _circles = primitives.Get<CirclePrimitive>();
+    private readonly IResourceSpec[] _outputs =
+    [
+        new TextureSpec("circles", PixelFormat.R32_G32_B32_A32_Float, TextureUsage.Sampled | TextureUsage.Storage, new AutoSize()),
+        new UniformBufferSpec("circlesParams", 16),
+    ];
+    private readonly ResourceRef[] _inputs =
+    [
+        new("circlePrimitives", ResourceKind.StructuredBufferReadOnly),
+    ];
 
-    private void BuildPrimitivesBuffer(GraphicsDevice device)
-    {
-        BufferDescription primitiveBufferDesc = new()
-        {
-            SizeInBytes = _buffer.Stride * (uint)_buffer.Capacity,
-            StructureByteStride = _buffer.Stride,
-            Usage = BufferUsage.StructuredBufferReadOnly | BufferUsage.Dynamic
-        };
-        _primitiveBuffer = device.ResourceFactory.CreateBuffer(primitiveBufferDesc);
-    }
+    public override string ShaderModule => "Circles";
+    public override IReadOnlyList<IResourceSpec> Outputs => _outputs;
+    public override IReadOnlyList<ResourceRef> Inputs => _inputs;
 
-    private void RebuildPrimitivesBuffer(GraphicsDevice device)
+    protected override void Upload(RenderContext ctx)
     {
-        _primitiveBuffer?.Dispose();
-        BuildPrimitivesBuffer(device);
-        UpdateBinding("circles", _primitiveBuffer!, device);
-    }
-    
-    protected override void Upload(FrameContext ctx)
-    {
-        Params @params = new() { Count = (uint)_buffer.Count };
-        if (_bufferVersion != _buffer.CapacityVersion)
-        {
-            ctx.Device.WaitForIdle();
-            RebuildPrimitivesBuffer(ctx.Device);
-            _bufferVersion = _buffer.CapacityVersion;
-            _buffer.MarkAllDirty();
-            logger.LogInformation($"Primitives buffer was rebuilt to {_primitiveBuffer.SizeInBytes} bytes."); 
-        }
-        
-        for (int i = 0; i < _buffer.Count; i++)
-        {
-            if (_buffer.IsDirty(i))
-            {
-                ctx.Cmd.UpdateBuffer(_primitiveBuffer, (uint)i * _buffer.Stride, _buffer.Data[i]);
-            }
-        }
-        _buffer.ClearDirty();
-        
-        ctx.Cmd.UpdateBuffer(_paramsBuffer, 0, @params);
-    }
-
-    protected override void DisposeResources()
-    {
-        _primitiveBuffer.Dispose();
-        _paramsBuffer.Dispose();
+        Params @params = new() { Count = (uint)_circles.Count };
+        ctx.Cmd.UpdateBuffer(ctx.Resources.GetBuffer("circlesParams"), 0, @params);
     }
 }

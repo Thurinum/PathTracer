@@ -21,9 +21,9 @@ public class RenderSettingsComponent(RenderGraph graph) : Component
 
         ImGui.Begin("Renderer");
 
-        bool enabled = _pass.Enabled;
+        bool enabled = _pass.Accumulate;
         if (ImGui.Checkbox("Énerver Youssef", ref enabled))
-            _pass.Enabled = enabled;
+            _pass.Accumulate = enabled;
 
         ImGui.End();
     }

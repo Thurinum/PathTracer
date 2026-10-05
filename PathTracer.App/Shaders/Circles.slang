@@ -9,16 +9,16 @@ struct Params
     uint Count;
 }
 
-RWTexture2D<float4> outputImage : register(u0);
-StructuredBuffer<Circle> circles : register(t1);
-ConstantBuffer<Params> params : register(b2);
+RWTexture2D<float4> circles;
+StructuredBuffer<Circle> circlePrimitives;
+ConstantBuffer<Params> circlesParams;
 
 [shader("compute")]
 [numthreads(8, 8, 1)]
 void main(uint3 dispatchThreadId : SV_DispatchThreadID)
 {
     uint2 frameSize;
-    outputImage.GetDimensions(frameSize.x, frameSize.y);
+    circles.GetDimensions(frameSize.x, frameSize.y);
     
     uint2 pixel = dispatchThreadId.xy;
     if (any(pixel >= frameSize))
@@ -28,9 +28,9 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID)
     float3 color = float3(uv.x, uv.y, 0.5);
     
     float3 additive = 0.0;
-    for (uint i = 0; i < params.Count; ++i)
+    for (uint i = 0; i < circlesParams.Count; ++i)
     {
-        Circle circle = circles[i];
+        Circle circle = circlePrimitives[i];
         float2 center = circle.Position01 * frameSize;
         float2 d = pixel - center;
         if (dot(d, d) <= circle.Radius * circle.Radius)
@@ -39,5 +39,5 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID)
         }
     }
     
-    outputImage[pixel] = float4(additive, 1.0);
+    circles[pixel] = float4(additive, 1.0);
 }

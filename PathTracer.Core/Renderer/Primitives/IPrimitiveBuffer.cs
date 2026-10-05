@@ -1,6 +1,8 @@
-﻿namespace PathTracerCore.Renderer.Primitives;
+﻿using PathTracerCore.Renderer.Resources;
 
-public interface IPrimitiveBuffer
+namespace PathTracerCore.Renderer.Primitives;
+
+public interface IPrimitiveBuffer : IDynamicBufferSource
 {
     Type PrimitiveType { get; }
     int Capacity { get; }

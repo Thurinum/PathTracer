@@ -1,80 +1,42 @@
-using Microsoft.Extensions.Options;
 using NeoVeldrid;
-using PathTracerCore;
-using PathTracerCore.Renderer;
-using PathTracerCore.Renderer.Camera;
 using PathTracerCore.Renderer.Graph;
 using PathTracerCore.Renderer.Resources;
 
 namespace PathTracerApp.RenderPasses;
 
-public class TemporalAccumulationPass(SlangCompiler compiler, RenderData<CameraData> camera, IOptions<EngineOptions> options) : RenderPass(options)
+public sealed class TemporalAccumulationPass : RenderPass
 {
     private struct Params
     {
         public uint Reset;
     }
-    
-    public override string[] Inputs { get; } = [nameof(PathTracerPass)];
 
-    protected override string ShaderModule => "TemporalAccumulation";
+    private readonly IResourceSpec[] _outputs =
+    [
+        new TextureSpec("color", PixelFormat.B8_G8_R8_A8_UNorm,
+            TextureUsage.Sampled | TextureUsage.Storage, new AutoSize()),
+        new TextureSpec("accumImage", PixelFormat.R32_G32_B32_A32_Float,
+            TextureUsage.Sampled | TextureUsage.Storage, new AutoSize()),
+        new UniformBufferSpec("accumParams", 16),
+    ];
+    private readonly ResourceRef[] _inputs =
+    [
+        new("pathTracerColor", ResourceKind.TextureReadOnly),
+    ];
+    private uint _lastRevision = uint.MaxValue;
 
-    private Texture? _accumulatedTex;
-    private bool _needsReset = true;
-    private DeviceBuffer? _paramsBuffer;
-    private uint _cameraVersion = 0;
+    public bool Accumulate { get; set; } = true;
 
-    protected override void SetupResources(GraphicsDevice device)
+    public override string ShaderModule => "TemporalAccumulation";
+    public override IReadOnlyList<IResourceSpec> Outputs => _outputs;
+    public override IReadOnlyList<ResourceRef> Inputs => _inputs;
+
+    protected override void Upload(RenderContext ctx)
     {
-        _paramsBuffer = device.ResourceFactory.CreateBuffer(
-            new BufferDescription { SizeInBytes = 16, Usage = BufferUsage.UniformBuffer });
+        bool reset = !Accumulate || ctx.SceneRevision != _lastRevision;
+        _lastRevision = ctx.SceneRevision;
 
-        _accumulatedTex = BuildAccumulatedTexture(device);
-
-        RegisterInput("sampleImage", Inputs[0]);
-        Register("accumImage", ResourceKind.TextureReadWrite, _accumulatedTex);
-        Register("params", ResourceKind.UniformBuffer, _paramsBuffer);
-    }
-
-    protected override void Upload(FrameContext ctx)
-    {
-        ctx.Cmd.UpdateBuffer(_paramsBuffer!, 0, new Params { Reset = Convert.ToUInt32(_needsReset) });
-        _needsReset = false;
-        
-        if (camera.Version != _cameraVersion)
-        {
-            _cameraVersion = camera.Version;
-            _needsReset = true;
-        }
-    }
-
-    public override void Resize(GraphicsDevice device, uint width, uint height)
-    {
-        _accumulatedTex?.Dispose();
-        _accumulatedTex = BuildAccumulatedTexture(device);
-        UpdateBinding("accumImage", _accumulatedTex, device);
-        _needsReset = true;
-    }
-
-    protected override void DisposeResources()
-    {
-        _accumulatedTex?.Dispose();
-        _paramsBuffer?.Dispose();
-    }
-
-    private Texture BuildAccumulatedTexture(GraphicsDevice device)
-    {
-        return device.ResourceFactory.CreateTexture(new TextureDescription
-        {
-            Width = Output!.Width, 
-            Height = Output.Height,
-            Depth = 1, 
-            MipLevels = 1, 
-            ArrayLayers = 1,
-            Format = PixelFormat.R32_G32_B32_A32_Float,
-            Usage = TextureUsage.Storage,
-            Type = TextureType.Texture2D,
-            SampleCount = TextureSampleCount.Count1
-        });
+        Params @params = new() { Reset = reset ? 1u : 0u };
+        ctx.Cmd.UpdateBuffer(ctx.Resources.GetBuffer("accumParams"), 0, @params);
     }
 }

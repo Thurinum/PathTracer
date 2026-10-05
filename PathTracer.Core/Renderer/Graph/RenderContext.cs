@@ -12,4 +12,5 @@ public sealed class RenderContext
     public required uint Height { get; init; }
     public required float DeltaTime { get; init; }
     public required uint FrameIndex { get; init; }
+    public required uint SceneRevision { get; init; }
 }

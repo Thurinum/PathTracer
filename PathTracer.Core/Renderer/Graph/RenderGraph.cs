@@ -13,11 +13,15 @@ public sealed class RenderGraph(
     RenderGraphBuilder graphBuilder,
     RenderPassFactory passFactory,
     RenderGraphPipelineFactory stateFactory,
+    SceneRevision sceneRevision,
     IEnumerable<IResourceProvider> resourceProviders) : IDisposable
 {
     private readonly ResourceTable _resources = new();
     private readonly List<PassEntry> _passes = [];
     private uint _frameIndex = 0;
+
+    public T? GetPass<T>() where T : RenderPass =>
+        _passes.Select(e => e.Pass).OfType<T>().SingleOrDefault();
 
     public void Build(GraphicsDevice device)
     {
@@ -92,7 +96,8 @@ public sealed class RenderGraph(
             Width = target.Width,
             Height = target.Height,
             DeltaTime = deltaTime,
-            FrameIndex = _frameIndex
+            FrameIndex = _frameIndex,
+            SceneRevision = sceneRevision.Value
         };
         
         foreach (var provider in resourceProviders)
@@ -126,6 +131,7 @@ public sealed class RenderGraph(
 
     public void Resize(GraphicsDevice device, uint width, uint height)
     {
+        sceneRevision.Invalidate();
         _resources.Resize(device, width, height);
         
         foreach (var entry in _passes)

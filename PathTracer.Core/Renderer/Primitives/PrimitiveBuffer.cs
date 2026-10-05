@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using NeoVeldrid;
 
 namespace PathTracerCore.Renderer.Primitives;
 
@@ -19,6 +20,26 @@ public class PrimitiveBuffer<T> : IPrimitiveBuffer where T : unmanaged
     public int Count { get; private set; }
     public uint Stride => (uint)Unsafe.SizeOf<T>();
     public int CapacityVersion { get; private set; }
+
+    public uint ElementCount => (uint)Count;
+
+    public void Upload(CommandList cmd, DeviceBuffer buf, bool resized)
+    {
+        if (resized)
+        {
+            MarkAllDirty();
+        }
+
+        for (int i = 0; i < Count; i++)
+        {
+            if (IsDirty(i))
+            {
+                cmd.UpdateBuffer(buf, (uint)i * Stride, Data[i]);
+            }
+        }
+
+        ClearDirty();
+    }
 
     public PrimitiveHandle Add(in T primitive)
     {

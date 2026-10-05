@@ -4,7 +4,7 @@ using PathTracerCore.SceneGraph;
 
 namespace PathTracerCore.Renderer.Camera;
 
-public class CameraComponent(RenderData<CameraData> view, IOptions<EngineOptions> options) : Component
+public class CameraComponent(CameraProvider provider, IOptions<EngineOptions> options) : Component
 {
     private Transform _transform = null!;
     public float FovDegrees { get; } = 80.0f;
@@ -36,6 +36,6 @@ public class CameraComponent(RenderData<CameraData> view, IOptions<EngineOptions
             Forward = Vector3.Transform(-Vector3.UnitZ, _transform.Rotation),
         };
         
-        view.Update(cameraData);
+        provider.Set(cameraData);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PathTracerApp;
+using PathTracerApp.Components;
 using PathTracerApp.RenderPasses;
 using PathTracerCore;
 
@@ -27,6 +28,12 @@ ServiceProvider ConfigureServices()
         passes.AddPass<CirclesPass>();
         passes.AddPass<PathTracerPass>();
         passes.AddPass<TemporalAccumulationPass>();
+        passes.Present("color");
+    }, primitives =>
+    {
+        primitives.Register<SpherePrimitive>("spheres");
+        primitives.Register<PlanePrimitive>("planes");
+        primitives.Register<CirclePrimitive>("circlePrimitives");
     });
     services.AddSingleton<App>();
         
