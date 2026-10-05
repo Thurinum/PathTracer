@@ -23,6 +23,8 @@ public sealed class RenderGraph(
     public T? GetPass<T>() where T : RenderPass =>
         _passes.Select(e => e.Pass).OfType<T>().SingleOrDefault();
 
+    // TODO: We don't actually have a render graph lol
+    // We could easily build a DAG from the outputs and inputs and detect cycles or ordering issues
     public void Build(GraphicsDevice device)
     {
         // register all passes
