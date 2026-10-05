@@ -17,6 +17,7 @@ public sealed class RenderGraph(
 {
     private readonly ResourceTable _resources = new();
     private readonly List<PassEntry> _passes = [];
+    private uint _frameIndex = 0;
 
     public void Build(GraphicsDevice device)
     {
@@ -46,16 +47,16 @@ public sealed class RenderGraph(
             }
         }
 
+        // create declared resources
+        var framebuffer = device.SwapchainFramebuffer;
+        _resources.Allocate(device, framebuffer.Width, framebuffer.Height);
+        
         // check for a valid present texture
         if (graphBuilder.PresentTextureName == null)
             throw new InvalidOperationException("No present texture is set.");
         
         if (!_resources.Has<Texture>(graphBuilder.PresentTextureName))
             throw new InvalidOperationException($"Present texture {graphBuilder.PresentTextureName} isn't a valid resource.");
-
-        // create declared resources
-        var framebuffer = device.SwapchainFramebuffer;
-        _resources.Allocate(device, framebuffer.Width, framebuffer.Height);
         
         // check that inputs are valid
         foreach (var entry in _passes)
@@ -86,7 +87,8 @@ public sealed class RenderGraph(
             Target = target,
             Width = target.Width,
             Height = target.Height,
-            DeltaTime = deltaTime
+            DeltaTime = deltaTime,
+            FrameIndex = _frameIndex
         };
         
         foreach (var provider in resourceProviders)
@@ -94,7 +96,9 @@ public sealed class RenderGraph(
             provider.Update(ctx);
         }
 
-        if (_resources.Refresh(device, ctx.Cmd))
+        // TODO: Only update passes whose dependencies were reallocated
+        IReadOnlyList<RenderGraphResource> reallocated = _resources.Refresh(device, ctx.Cmd);
+        if (reallocated.Count > 0)
         {
             foreach (var entry in _passes)
             {
@@ -112,11 +116,12 @@ public sealed class RenderGraph(
 
         var presentTexture = _resources.GetTexture(graphBuilder.PresentTextureName!);
         ctx.Cmd.CopyTexture(presentTexture, ctx.Target);
+
+        _frameIndex++;
     }
 
     public void Resize(GraphicsDevice device, uint width, uint height)
     {
-        device.WaitForIdle();
         _resources.Resize(device, width, height);
         
         foreach (var entry in _passes)

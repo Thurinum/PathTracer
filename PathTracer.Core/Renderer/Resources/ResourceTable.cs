@@ -37,23 +37,28 @@ internal sealed class ResourceTable : IResourceAccessor, IDisposable
             };
         }
     }
-
-    // TODO: Should return what changed so we only rebuild what we need.
-    public bool Refresh(GraphicsDevice device, CommandList cmd)
+    
+    public IReadOnlyList<RenderGraphResource> Refresh(GraphicsDevice device, CommandList cmd)
     {
-        bool didReallocate = false;
-
-        foreach (var entry in _resources.Values)
+        List<RenderGraphResource> reallocated = []; // TODO: Wasteful frequent List allocation?
+        
+        foreach (RenderGraphResource entry in _resources.Values)
         {
             if (entry.Spec is not DynamicBufferSpec spec)
                 continue;
 
+            bool didReallocate = false;
             uint requiredCapacity = spec.Source.ElementCount;
             if (requiredCapacity > entry.ElementCapacity)
             {
-                device.WaitForIdle();
-                entry.ElementCapacity = Math.Max(requiredCapacity, entry.ElementCapacity * 2);
-                entry.Resource = CreateDynamicBuffer(device, spec, entry, entry.ElementCapacity);
+                if (reallocated.Count == 0)
+                {
+                    device.WaitForIdle();
+                }
+                
+                reallocated.Add(entry);
+                uint newCapacity = Math.Max(spec.Source.ElementCount, entry.ElementCapacity * 2);
+                entry.Resource = CreateDynamicBuffer(device, spec, entry, newCapacity);
                 entry.Version++;
                 didReallocate = true;
             }
@@ -61,11 +66,13 @@ internal sealed class ResourceTable : IResourceAccessor, IDisposable
             spec.Source.Upload(cmd, (DeviceBuffer)entry.Resource!, didReallocate);
         }
 
-        return didReallocate;
+        return reallocated;
     }
 
     public void Resize(GraphicsDevice device, uint width, uint height)
     {
+        device.WaitForIdle();
+        
         foreach (RenderGraphResource entry in _resources.Values)
         {
             if (entry.Spec is TextureSpec { SizePolicy: AutoSize } spec)

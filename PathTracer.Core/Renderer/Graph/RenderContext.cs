@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using NeoVeldrid;
+﻿using NeoVeldrid;
 using PathTracerCore.Renderer.Resources;
 
 namespace PathTracerCore.Renderer.Graph;
@@ -12,4 +11,5 @@ public sealed class RenderContext
     public required uint Width { get; init; }
     public required uint Height { get; init; }
     public required float DeltaTime { get; init; }
+    public required uint FrameIndex { get; init; }
 }
