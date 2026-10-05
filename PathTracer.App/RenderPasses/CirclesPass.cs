@@ -4,14 +4,14 @@ using NeoVeldrid;
 using PathTracerApp.Components;
 using PathTracerCore;
 using PathTracerCore.Renderer;
-using PathTracerCore.Renderer.Passes;
+using PathTracerCore.Renderer.Graph;
 using PathTracerCore.Renderer.Primitives;
-using PathTracerCore.Renderer.Shaders;
+using PathTracerCore.Renderer.Resources;
 
 namespace PathTracerApp.RenderPasses;
 
 
-public class CirclesPass(ILogger<CirclesPass> logger, SlangCompiler compiler, IOptions<EngineOptions> options, PrimitiveRegistry primitives) : RenderPass(compiler, options)
+public class CirclesPass(ILogger<CirclesPass> logger, SlangCompiler compiler, IOptions<EngineOptions> options, PrimitiveRegistry primitives) : RenderPass(options)
 {
     private struct Params
     {

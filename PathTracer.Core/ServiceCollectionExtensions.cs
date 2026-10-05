@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using PathTracerCore.Renderer;
 using PathTracerCore.Renderer.Camera;
-using PathTracerCore.Renderer.Passes;
+using PathTracerCore.Renderer.Graph;
 using PathTracerCore.Renderer.Primitives;
-using PathTracerCore.Renderer.Shaders;
+using PathTracerCore.Renderer.Resources;
 using PathTracerCore.SceneGraph;
 
 namespace PathTracerCore;
@@ -27,6 +27,7 @@ public static class ServiceCollectionExtensions
             
             services.AddSingleton<SlangCompiler>();
             services.AddSingleton<RenderPassFactory>();
+            services.AddSingleton<RenderGraphPipelineFactory>();
             services.AddSingleton<RenderGraph>();
             services.AddSingleton<RenderBackend>();
             services.AddSingleton<RenderData<CameraData>>();

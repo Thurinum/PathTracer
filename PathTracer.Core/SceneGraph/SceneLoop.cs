@@ -28,7 +28,7 @@ public class SceneLoop(RenderBackend backend)
                 UpdateComponents(scene);
                 LateUpdateComponents(scene);
             
-                backend.Render();
+                backend.Render(_deltaTime);
         
                 backend.BeginGUI(_deltaTime, input);
                 GUIComponents(scene);

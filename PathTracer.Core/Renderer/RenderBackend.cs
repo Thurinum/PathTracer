@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using NeoVeldrid;
 using NeoVeldrid.Sdl2;
 using NeoVeldrid.StartupUtilities;
-using PathTracerCore.Renderer.Passes;
+using PathTracerCore.Renderer.Graph;
 
 namespace PathTracerCore.Renderer;
 
@@ -59,7 +59,7 @@ public sealed class RenderBackend : IDisposable
             _window.Height);
 
         _graph = graph;
-        _graph.AddPasses(_device);
+        _graph.Build(_device);
     }
     
     public InputSnapshot GetInput()
@@ -73,10 +73,9 @@ public sealed class RenderBackend : IDisposable
         _cmd.SetFramebuffer(_device.SwapchainFramebuffer); // for imgui
     }
 
-    public void Render()
+    public void Render(float deltaTime)
     {
-        FrameContext ctx = new(_device, _cmd, _device.SwapchainFramebuffer.ColorTargets[0].Target);
-        _graph.Render(ctx);
+        _graph.Render(_device, _cmd, deltaTime);
     }
 
     public void EndFrame()

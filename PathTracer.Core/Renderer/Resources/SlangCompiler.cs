@@ -1,9 +1,15 @@
 using Microsoft.Extensions.Options;
+using NeoVeldrid;
+using PathTracerCore.Utils;
 using Prowl.Slang;
 
-namespace PathTracerCore.Renderer.Shaders;
+namespace PathTracerCore.Renderer.Resources;
 
-public readonly record struct ShaderCompilationResult(byte[] Code, (uint x, uint y, uint z) GroupSize);
+public readonly record struct ShaderBinding(string Name, ResourceKind Kind, uint BindingIndex, uint BindingSpace);
+public readonly record struct ShaderCompilationResult(
+    byte[] Code,
+    uint3 GroupSize,
+    IReadOnlyList<ShaderBinding> Reflection);
 
 public class SlangCompiler
 {
@@ -61,10 +67,40 @@ public class SlangCompiler
 
         ShaderReflection layout = linked.GetLayout();
         EntryPointReflection entry = layout.FindEntryPointByName(EntryPointName);
-        var g = entry.GetComputeThreadGroupSize();
+        var groupSize = entry.GetComputeThreadGroupSize();
 
-        return new ShaderCompilationResult(code.ToArray(), g);
+        List<ShaderBinding> resources = [];
+        for (uint i = 0; i < layout.ParameterCount; i++)
+        {
+            VariableLayoutReflection parameter = layout.GetParameterByIndex(i);
+            if (parameter.Category != ParameterCategory.DescriptorTableSlot)
+                continue;
+
+            BindingType bindingType = parameter.TypeLayout.GetBindingRangeType(0);
+            resources.Add(new ShaderBinding(
+                parameter.Name,
+                MapBindingType(bindingType),
+                parameter.BindingIndex,
+                parameter.BindingSpace));
+        }
+
+        resources.Sort(static (a, b) => a.BindingSpace != b.BindingSpace
+            ? a.BindingSpace.CompareTo(b.BindingSpace)
+            : a.BindingIndex.CompareTo(b.BindingIndex));
+
+        return new ShaderCompilationResult(code.ToArray(), groupSize, resources);
     }
+
+    private static ResourceKind MapBindingType(BindingType type) => type switch
+    {
+        BindingType.MutableTexture => ResourceKind.TextureReadWrite,
+        BindingType.Texture => ResourceKind.TextureReadOnly,
+        BindingType.Sampler => ResourceKind.Sampler,
+        BindingType.ConstantBuffer => ResourceKind.UniformBuffer,
+        BindingType.TypedBuffer or BindingType.RawBuffer => ResourceKind.StructuredBufferReadOnly,
+        BindingType.MutableTypedBuffer or BindingType.MutableRawBuffer => ResourceKind.StructuredBufferReadWrite,
+        _ => throw new NotSupportedException($"Unsupported shader binding type '{type}'.")
+    };
 
     private static void ThrowIfErrors(DiagnosticInfo diagnostics)
     {

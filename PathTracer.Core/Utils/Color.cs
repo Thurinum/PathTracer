@@ -1,4 +1,4 @@
-namespace PathTracerCore.Renderer;
+namespace PathTracerCore.Utils;
 
 public readonly record struct Color(float R, float G, float B)
 {

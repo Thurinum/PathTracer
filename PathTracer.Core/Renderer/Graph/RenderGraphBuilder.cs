@@ -1,9 +1,9 @@
-﻿namespace PathTracerCore.Renderer.Passes;
+﻿namespace PathTracerCore.Renderer.Graph;
 
 public sealed class RenderGraphBuilder
 {
     internal List<Type> PassTypes { get; } = [];
-    internal List<SharedTextureDesc> SharedTextures { get; } = [];
+    internal string? PresentTextureName;
 
     public void AddPass<T>() where T : RenderPass
     {
@@ -13,8 +13,8 @@ public sealed class RenderGraphBuilder
         PassTypes.Add(typeof(T));
     }
 
-    public void AddSharedTexture(SharedTextureDesc descriptor)
+    public void Present(string textureName)
     {
-        SharedTextures.Add(descriptor);
+        PresentTextureName = textureName;
     }
 }

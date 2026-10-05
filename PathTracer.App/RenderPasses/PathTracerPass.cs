@@ -6,13 +6,13 @@ using PathTracerApp.Components;
 using PathTracerCore;
 using PathTracerCore.Renderer;
 using PathTracerCore.Renderer.Camera;
-using PathTracerCore.Renderer.Passes;
+using PathTracerCore.Renderer.Graph;
 using PathTracerCore.Renderer.Primitives;
-using PathTracerCore.Renderer.Shaders;
+using PathTracerCore.Renderer.Resources;
 
 namespace PathTracerApp.RenderPasses;
 
-public class PathTracerPass(RenderData<CameraData> view, ILogger<PathTracerPass> logger, SlangCompiler compiler, IOptions<EngineOptions> options, PrimitiveRegistry primitives) : RenderPass(compiler, options)
+public class PathTracerPass(RenderData<CameraData> view, ILogger<PathTracerPass> logger, SlangCompiler compiler, IOptions<EngineOptions> options, PrimitiveRegistry primitives) : RenderPass(options)
 {
     private struct Params
     {

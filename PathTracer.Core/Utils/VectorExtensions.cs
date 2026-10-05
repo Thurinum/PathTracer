@@ -1,7 +1,8 @@
 ﻿using System.Numerics;
 
-namespace PathTracerCore.Renderer;
+namespace PathTracerCore.Utils;
 
+// ReSharper disable InconsistentNaming
 public static class VectorExtensions
 {
     extension(Vector2 v)

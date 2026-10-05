@@ -1,6 +1,6 @@
 using ImGuiNET;
 using PathTracerApp.RenderPasses;
-using PathTracerCore.Renderer.Passes;
+using PathTracerCore.Renderer.Graph;
 using PathTracerCore.SceneGraph;
 
 namespace PathTracerApp.Components.GUI;

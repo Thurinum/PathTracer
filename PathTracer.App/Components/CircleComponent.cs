@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using PathTracerCore.Renderer;
 using PathTracerCore.SceneGraph;
+using PathTracerCore.Utils;
 
 namespace PathTracerApp.Components;
 

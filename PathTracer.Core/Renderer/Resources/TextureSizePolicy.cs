@@ -1,4 +1,4 @@
-﻿namespace PathTracerCore.Renderer.Graph;
+﻿namespace PathTracerCore.Renderer.Resources;
 
 public abstract record TextureSizePolicy;
 public sealed record AutoSize : TextureSizePolicy;

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace PathTracerCore.Renderer.Passes;
+namespace PathTracerCore.Renderer.Graph;
 
 public class RenderPassFactory(IServiceProvider provider)
 {

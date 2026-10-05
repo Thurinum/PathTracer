@@ -3,12 +3,12 @@ using NeoVeldrid;
 using PathTracerCore;
 using PathTracerCore.Renderer;
 using PathTracerCore.Renderer.Camera;
-using PathTracerCore.Renderer.Passes;
-using PathTracerCore.Renderer.Shaders;
+using PathTracerCore.Renderer.Graph;
+using PathTracerCore.Renderer.Resources;
 
 namespace PathTracerApp.RenderPasses;
 
-public class TemporalAccumulationPass(SlangCompiler compiler, RenderData<CameraData> camera, IOptions<EngineOptions> options) : RenderPass(compiler, options)
+public class TemporalAccumulationPass(SlangCompiler compiler, RenderData<CameraData> camera, IOptions<EngineOptions> options) : RenderPass(options)
 {
     private struct Params
     {
