@@ -1,25 +1,24 @@
 ﻿using System.Numerics;
 using System.Runtime.InteropServices;
-using PathTracerCore.Renderer;
+using NeoVeldrid;
 using PathTracerCore.SceneGraph;
-using PathTracerCore.Utils;
 
 namespace PathTracerApp.Components;
 
-[StructLayout(LayoutKind.Explicit, Size = 48)]
+[StructLayout(LayoutKind.Explicit, Size = 32)]
 public record struct SpherePrimitive
 {
     [FieldOffset(00)] public Vector3 Center;
     [FieldOffset(12)] public float Radius;
-    [FieldOffset(16)] public Color Albedo;
-    [FieldOffset(32)] public Color Emission;
+    [FieldOffset(16)] public RgbaByte Albedo;
+    [FieldOffset(20)] public RgbaByte Emission;
 }
 
 public class SphereComponent : RendererBase<SpherePrimitive>
 {
     public float Radius { get; set; } = 1.0f;
-    public Color Albedo { get; set; } = new(0.5f, 0.5f, 0.5f);
-    public Color Emission { get; set; }
+    public RgbaByte Albedo { get; set; } = new(128, 128, 128, 255);
+    public RgbaByte Emission { get; set; }
 
     protected override SpherePrimitive BuildPrimitive()
     {

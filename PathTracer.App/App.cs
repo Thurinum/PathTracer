@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using NeoVeldrid;
 using PathTracerApp.Components;
 using PathTracerApp.Components.GUI;
 using PathTracerCore;
@@ -23,10 +24,10 @@ public class App(SceneLoop loop, SceneManager sceneManager)
             .CreateObject(scene, "youssefAimePasTemporalAccumFix")
             .AddComponent<RenderSettingsComponent>();
 
-        AddSphere(scene, new Vector3(2.0f, -100.5f, 0.0f), 100.0f, new Color(0.6f, 0.6f, 0.6f));
-        AddSphere(scene, new Vector3(2.0f, 0.2f, 0.0f), 0.7f, new Color(0.9f, 0.6f, 0.2f));
-        AddSphere(scene, new Vector3(1.3f, -0.3f, 0.9f), 0.2f, new Color(0.2f, 0.6f, 0.9f));
-        AddSphere(scene, new Vector3(-0.2f, 1.0f, 0.0f), 0.7f, new Color(0.0f, 0.0f, 0.0f), new Color(15, 12, 9));
+        AddSphere(scene, new Vector3(2.0f, -100.5f, 0.0f), 100.0f, Rgb(0.6f, 0.6f, 0.6f));
+        AddSphere(scene, new Vector3(2.0f, 0.2f, 0.0f), 0.7f, Rgb(0.9f, 0.6f, 0.2f));
+        AddSphere(scene, new Vector3(1.3f, -0.3f, 0.9f), 0.2f, Rgb(0.2f, 0.6f, 0.9f));
+        AddSphere(scene, new Vector3(-0.2f, 1.0f, 0.0f), 0.7f, Rgb(0.0f, 0.0f, 0.0f), new RgbaByte(15, 12, 9, 255));
         
         var camera = sceneManager.CreateObject(scene, "camera");
         camera.AddComponent<CameraComponent>();
@@ -64,7 +65,10 @@ public class App(SceneLoop loop, SceneManager sceneManager)
         // obj.AddComponent<RandomMover>();
     }
 
-    private void AddSphere(Scene scene, Vector3 position, float radius, Color albedo, Color emission = default)
+    private static RgbaByte Rgb(float r, float g, float b) =>
+        new((byte)MathF.Round(r * 255.0f), (byte)MathF.Round(g * 255.0f), (byte)MathF.Round(b * 255.0f), 255);
+
+    private void AddSphere(Scene scene, Vector3 position, float radius, RgbaByte albedo, RgbaByte emission = default)
     {
         var obj = sceneManager.CreateObject(scene, "sphere");
 

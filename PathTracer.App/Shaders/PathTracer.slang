@@ -45,10 +45,10 @@ float3 Trace(Ray ray, inout Rng rng)
             break;
         }
 
-        float3 albedo = spheres[bestHit.Index].Albedo;
+        float3 albedo = UnpackRgb(spheres[bestHit.Index].Albedo) / 255.0;
 
         if (dot(bestHit.NormalExt, -ray.Direction) > 0.0)
-            light += weight * spheres[bestHit.Index].Emission;
+            light += weight * UnpackRgb(spheres[bestHit.Index].Emission);
 
         if (bounce == pathTracerParams.MaxBounces || all(albedo == 0.0))
             break;
