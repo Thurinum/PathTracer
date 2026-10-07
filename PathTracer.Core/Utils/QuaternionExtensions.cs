@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace PathTracerCore;
+namespace PathTracerCore.Utils;
 
 public static class QuaternionExtensions
 {
