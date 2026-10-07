@@ -2,6 +2,10 @@
 
 namespace Pathetic.Renderer.Resources;
 
+// inputs
+public sealed record ResourceRef(string Name, ResourceKind Kind);
+
+// outputs
 public interface IResourceSpec { string Name { get; } }
 public sealed record TextureSpec(string Name, PixelFormat Format, TextureUsage Usage, TextureSizePolicy SizePolicy) : IResourceSpec;
 public sealed record SamplerSpec(string Name, SamplerDescription Description) : IResourceSpec;
@@ -14,4 +18,3 @@ public interface IDynamicBufferSource
 }
 public sealed record DynamicBufferSpec(string Name, uint Stride, IDynamicBufferSource Source) : IResourceSpec;
 
-public sealed record ResourceRef(string Name, ResourceKind Kind);

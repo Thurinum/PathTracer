@@ -31,8 +31,7 @@ public sealed class PrimitiveRegistry : IResourceProvider
         throw new InvalidOperationException($"{typeof(T).Name} is not registered.");
     }
 
-    public IEnumerable<IResourceSpec> Resources =>
-        _entries.Select(e => new DynamicBufferSpec(e.Name, e.Buffer.Stride, e.Buffer));
+    public IEnumerable<IResourceSpec> Resources => _entries.Select(e => new DynamicBufferSpec(e.Name, e.Buffer.Stride, e.Buffer));
 
     public void Update(RenderContext ctx) { }
 }
