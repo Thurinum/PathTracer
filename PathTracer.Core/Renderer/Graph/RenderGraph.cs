@@ -20,8 +20,7 @@ public sealed class RenderGraph(
     private readonly List<PassEntry> _passes = [];
     private uint _frameIndex = 0;
 
-    public T? GetPass<T>() where T : RenderPass =>
-        _passes.Select(e => e.Pass).OfType<T>().SingleOrDefault();
+    public T? GetPass<T>() where T : RenderPass => _passes.Select(e => e.Pass).OfType<T>().SingleOrDefault();
 
     // TODO: We don't actually have a render graph lol
     // We could easily build a DAG from the outputs and inputs and detect cycles or ordering issues
@@ -102,11 +101,6 @@ public sealed class RenderGraph(
             SceneRevision = sceneRevision.Value
         };
         
-        foreach (var provider in resourceProviders)
-        {
-            provider.Update(ctx);
-        }
-
         // TODO: Only update passes whose dependencies were reallocated
         IReadOnlyList<RenderGraphResource> reallocated = _resources.Refresh(device, ctx.Cmd);
         if (reallocated.Count > 0)
@@ -115,6 +109,11 @@ public sealed class RenderGraph(
             {
                 stateFactory.UpdateResourceSet(entry.State!, device, _resources);
             }
+        }
+        
+        foreach (var provider in resourceProviders)
+        {
+            provider.Update(ctx);
         }
         
         foreach (var entry in _passes)
