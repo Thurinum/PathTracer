@@ -22,68 +22,13 @@ public sealed class RenderGraph(
 
     public T? GetPass<T>() where T : RenderPass => _passes.Select(e => e.Pass).OfType<T>().SingleOrDefault();
 
-    // TODO: We don't actually have a render graph lol
-    // We could easily build a DAG from the outputs and inputs and detect cycles or ordering issues
     public void Build(GraphicsDevice device)
     {
-        // register all passes
-        foreach (var passType in graphBuilder.PassTypes)
-        {
-            var pass = passFactory.CreateRenderPass(passType);
-            _passes.Add(new PassEntry(pass));
-        }
-
-        // declare global resources (camera, lights, etc.)
-        foreach (var spec in resourceProviders.SelectMany(p => p.Resources))
-        {
-            _resources.Declare(spec);
-        }
-        
-        // declare pass outputs and samplers
-        foreach (var entry in _passes)
-        {
-            foreach (var output in entry.Pass.Outputs)
-            {
-                _resources.Declare(output);
-            }
-            foreach (var sampler in entry.Pass.Samplers)
-            {
-                _resources.Declare(sampler);
-            }
-        }
-
-        // create declared resources
-        var framebuffer = device.SwapchainFramebuffer;
-        _resources.Allocate(device, framebuffer.Width, framebuffer.Height);
-        
-        // check for a valid present texture
-        // TODO: can be simplified, Has() could be made spec only
-        if (graphBuilder.PresentTextureName == null)
-            throw new InvalidOperationException("No present texture is set.");
-        
-        if (!_resources.Has<Texture>(graphBuilder.PresentTextureName))
-            throw new InvalidOperationException($"Present texture {graphBuilder.PresentTextureName} isn't a valid resource.");
-        
-        if (_resources.GetTexture(graphBuilder.PresentTextureName).Format != framebuffer.ColorTargets[0].Target.Format)
-            throw new InvalidOperationException($"Present tex {graphBuilder.PresentTextureName} must have same format as the swapchain.");
-        
-        // check that inputs are valid
-        foreach (var entry in _passes)
-        {
-            foreach (var input in entry.Pass.Inputs)
-            {
-                if (!_resources.Has(input.Name))
-                {
-                    throw new InvalidOperationException($"Pass {entry.Pass.GetType().Name} has invalid input {input.Name}");
-                }
-            }
-        }
-
-        // build each pass's pipeline using the resources
-        foreach (var entry in _passes)
-        {
-            entry.State = stateFactory.Build(device, entry.Pass, _resources);
-        }
+        CreatePasses();
+        CreateResources(device, device.SwapchainFramebuffer);
+        ValidatePresentTexture(device.SwapchainFramebuffer);
+        ValidatePassInputs();
+        BuildPassPipelines(device);
     }
 
     public void Render(GraphicsDevice device, CommandList cmd, float deltaTime)
@@ -102,7 +47,7 @@ public sealed class RenderGraph(
         };
         
         // TODO: Only update passes whose dependencies were reallocated
-        IReadOnlyList<RenderGraphResource> reallocated = _resources.Refresh(device, ctx.Cmd);
+        var reallocated = _resources.Reallocate(device, ctx.Cmd);
         if (reallocated.Count > 0)
         {
             foreach (var entry in _passes)
@@ -149,5 +94,70 @@ public sealed class RenderGraph(
         }
         
         _resources.Dispose();
+    }
+
+    private void CreatePasses()
+    {
+        foreach (var passType in graphBuilder.PassTypes)
+        {
+            var pass = passFactory.CreateRenderPass(passType);
+            _passes.Add(new PassEntry(pass));
+        }
+    }
+
+    private void CreateResources(GraphicsDevice device, Framebuffer framebuffer)
+    {
+        foreach (var spec in resourceProviders.SelectMany(p => p.Resources))
+        {
+            _resources.Declare(spec);
+        }
+        
+        foreach (var entry in _passes)
+        {
+            foreach (var output in entry.Pass.Outputs)
+            {
+                _resources.Declare(output);
+            }
+            foreach (var sampler in entry.Pass.Samplers)
+            {
+                _resources.Declare(sampler);
+            }
+        }
+
+        _resources.Allocate(device, framebuffer.Width, framebuffer.Height);
+    }
+
+    private void ValidatePresentTexture(Framebuffer framebuffer)
+    {
+        if (graphBuilder.PresentTextureName == null)
+            throw new InvalidOperationException("No present texture is set.");
+        
+        if (!_resources.Has<Texture>(graphBuilder.PresentTextureName))
+            throw new InvalidOperationException($"Present texture {graphBuilder.PresentTextureName} isn't a valid resource.");
+        
+        if (_resources.GetTexture(graphBuilder.PresentTextureName).Format != framebuffer.ColorTargets[0].Target.Format)
+            throw new InvalidOperationException($"Present tex {graphBuilder.PresentTextureName} must have same format as the swapchain.");
+    }
+
+    private void ValidatePassInputs()
+    {
+        foreach (var entry in _passes)
+        {
+            foreach (var input in entry.Pass.Inputs)
+            {
+                if (!_resources.Has(input.Name))
+                {
+                    throw new InvalidOperationException($"Pass {entry.Pass.GetType().Name} has invalid input {input.Name}");
+                }
+            }
+        }
+    }
+
+    private void BuildPassPipelines(GraphicsDevice device)
+    {
+        foreach (var entry in _passes)
+        {
+            entry.State = stateFactory.Build(device, entry.Pass, _resources);
+        }
     }
 }

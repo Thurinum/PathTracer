@@ -7,6 +7,7 @@ namespace Pathetic.Renderer.Resources;
 internal sealed class ResourceTable : IResourceAccessor, IDisposable
 {
     private readonly Dictionary<string, RenderGraphResource> _resources = [];
+    private const int DynamicBufferDefaultElementCount = 256;
 
     public void Declare(IResourceSpec spec)
     {
@@ -21,7 +22,6 @@ internal sealed class ResourceTable : IResourceAccessor, IDisposable
         }
     }
 
-    private const int DynamicBufferDefaultElementCount = 256;
     public void Allocate(GraphicsDevice device, uint width, uint height)
     {
         foreach (var entry in _resources.Values)
@@ -38,9 +38,9 @@ internal sealed class ResourceTable : IResourceAccessor, IDisposable
         }
     }
     
-    public IReadOnlyList<RenderGraphResource> Refresh(GraphicsDevice device, CommandList cmd)
+    public IReadOnlyList<RenderGraphResource> Reallocate(GraphicsDevice device, CommandList cmd)
     {
-        List<RenderGraphResource> reallocated = []; // TODO: Wasteful frequent List allocation?
+        List<RenderGraphResource> reallocated = [];
         
         foreach (RenderGraphResource entry in _resources.Values)
         {
