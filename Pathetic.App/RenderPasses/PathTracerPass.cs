@@ -21,27 +21,27 @@ public sealed class PathTracerPass(IOptions<EngineOptions> options, PrimitiveReg
 
     private readonly PrimitiveBuffer<PlanePrimitive> _planes = primitives.Get<PlanePrimitive>();
     private readonly PrimitiveBuffer<SpherePrimitive> _spheres = primitives.Get<SpherePrimitive>();
-    private readonly IResourceSpec[] _outputs =
+
+    public override string ShaderModule => "PathTracer";
+
+    public override IReadOnlyList<IResourceSpec> Outputs { get; } =
     [
         new TextureSpec("pathTracerColor", PixelFormat.R32_G32_B32_A32_Float, TextureUsage.Sampled | TextureUsage.Storage, new AutoSize()),
         UniformBufferSpec.Of<Params>("pathTracerParams"),
     ];
-    private readonly ResourceRef[] _inputs =
+
+    public override IReadOnlyList<ResourceRef> Inputs { get; } =
     [
         new("circles", ResourceKind.TextureReadOnly),
         new("camera", ResourceKind.UniformBuffer),
         new("planes", ResourceKind.StructuredBufferReadOnly),
         new("spheres", ResourceKind.StructuredBufferReadOnly),
     ];
-    private readonly SamplerSpec[] _samplers =
+
+    public override IReadOnlyList<SamplerSpec> Samplers { get; } =
     [
         new("circlesSampler", SamplerDescription.Linear),
     ];
-
-    public override string ShaderModule => "PathTracer";
-    public override IReadOnlyList<IResourceSpec> Outputs => _outputs;
-    public override IReadOnlyList<ResourceRef> Inputs => _inputs;
-    public override IReadOnlyList<SamplerSpec> Samplers => _samplers;
 
     protected override void Upload(RenderContext ctx)
     {

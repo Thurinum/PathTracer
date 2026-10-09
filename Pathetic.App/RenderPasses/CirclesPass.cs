@@ -14,19 +14,19 @@ public sealed class CirclesPass(PrimitiveRegistry primitives) : RenderPass
     }
 
     private readonly PrimitiveBuffer<CirclePrimitive> _circles = primitives.Get<CirclePrimitive>();
-    private readonly IResourceSpec[] _outputs =
+
+    public override string ShaderModule => "Circles";
+
+    public override IReadOnlyList<IResourceSpec> Outputs { get; } =
     [
         new TextureSpec("circles", PixelFormat.R32_G32_B32_A32_Float, TextureUsage.Sampled | TextureUsage.Storage, new AutoSize()),
         UniformBufferSpec.Of<Params>("circlesParams"),
     ];
-    private readonly ResourceRef[] _inputs =
+
+    public override IReadOnlyList<ResourceRef> Inputs { get; } =
     [
         new("circlePrimitives", ResourceKind.StructuredBufferReadOnly),
     ];
-
-    public override string ShaderModule => "Circles";
-    public override IReadOnlyList<IResourceSpec> Outputs => _outputs;
-    public override IReadOnlyList<ResourceRef> Inputs => _inputs;
 
     protected override void Upload(RenderContext ctx)
     {

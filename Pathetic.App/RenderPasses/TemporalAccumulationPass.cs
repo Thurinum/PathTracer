@@ -11,7 +11,13 @@ public sealed class TemporalAccumulationPass : RenderPass
         public uint Reset;
     }
 
-    private readonly IResourceSpec[] _outputs =
+    private uint _lastRevision = uint.MaxValue;
+
+    public bool Accumulate { get; set; } = true;
+
+    public override string ShaderModule => "TemporalAccumulation";
+
+    public override IReadOnlyList<IResourceSpec> Outputs { get; } =
     [
         new TextureSpec("color", PixelFormat.B8_G8_R8_A8_UNorm,
             TextureUsage.Sampled | TextureUsage.Storage, new AutoSize()),
@@ -19,17 +25,11 @@ public sealed class TemporalAccumulationPass : RenderPass
             TextureUsage.Sampled | TextureUsage.Storage, new AutoSize()),
         UniformBufferSpec.Of<Params>("accumParams"),
     ];
-    private readonly ResourceRef[] _inputs =
+
+    public override IReadOnlyList<ResourceRef> Inputs { get; } =
     [
         new("pathTracerColor", ResourceKind.TextureReadOnly),
     ];
-    private uint _lastRevision = uint.MaxValue;
-
-    public bool Accumulate { get; set; } = true;
-
-    public override string ShaderModule => "TemporalAccumulation";
-    public override IReadOnlyList<IResourceSpec> Outputs => _outputs;
-    public override IReadOnlyList<ResourceRef> Inputs => _inputs;
 
     protected override void Upload(RenderContext ctx)
     {
