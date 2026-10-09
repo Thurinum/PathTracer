@@ -3,8 +3,8 @@ using NeoVeldrid;
 using Pathetic.App.Components;
 using Pathetic.App.Components.Camera;
 using Pathetic.App.Components.GUI;
-using Pathetic.Scene;
 using Pathetic.Renderer.Utils;
+using Pathetic.SceneGraph;
 
 namespace Pathetic.App;
 
@@ -49,7 +49,7 @@ public class App(SceneLoop loop, SceneManager sceneManager)
         loop.Run(scene);
     }
     
-    private void AddPlane(Scene.Scene scene, Vector3 pos, Quaternion rot)
+    private void AddPlane(Scene scene, Vector3 pos, Quaternion rot)
     {
         var obj = sceneManager.CreateObject(scene, "plane");
         var trans = obj.GetComponent<Transform>();
@@ -66,7 +66,7 @@ public class App(SceneLoop loop, SceneManager sceneManager)
     private static RgbaByte Rgb(float r, float g, float b) =>
         new((byte)MathF.Round(r * 255.0f), (byte)MathF.Round(g * 255.0f), (byte)MathF.Round(b * 255.0f), 255);
 
-    private void AddSphere(Scene.Scene scene, Vector3 position, float radius, RgbaByte albedo, RgbaByte emission = default)
+    private void AddSphere(Scene scene, Vector3 position, float radius, RgbaByte albedo, RgbaByte emission = default)
     {
         var obj = sceneManager.CreateObject(scene, "sphere");
 
@@ -78,7 +78,7 @@ public class App(SceneLoop loop, SceneManager sceneManager)
         sphere.Emission = emission;
     }
     
-    private void AddCircle(Scene.Scene scene, float r, float x, float y)
+    private void AddCircle(Scene scene, float r, float x, float y)
     {
         var obj = sceneManager.CreateObject(scene, "circle");
 

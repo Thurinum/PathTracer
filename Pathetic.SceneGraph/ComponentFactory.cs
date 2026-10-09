@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Pathetic.Renderer.Primitives;
 
-namespace Pathetic.Scene;
+namespace Pathetic.SceneGraph;
 
 public class ComponentFactory(IServiceProvider provider, ILoggerFactory loggerFactory, PrimitiveRegistry primitives)
 {

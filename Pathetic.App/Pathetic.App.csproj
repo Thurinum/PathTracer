@@ -13,7 +13,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Pathetic.Renderer\Pathetic.Renderer.csproj" />
-        <ProjectReference Include="..\Pathetic.Scene\Pathetic.Scene.csproj" />
+        <ProjectReference Include="..\Pathetic.SceneGraph\Pathetic.SceneGraph.csproj" />
     </ItemGroup>
 
     <ItemGroup>

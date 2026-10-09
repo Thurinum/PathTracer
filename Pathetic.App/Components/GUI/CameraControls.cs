@@ -1,7 +1,7 @@
 using System.Numerics;
 using ImGuiNET;
 using Pathetic.App.Components.Camera;
-using Pathetic.Scene;
+using Pathetic.SceneGraph;
 
 namespace Pathetic.App.Components.GUI;
 

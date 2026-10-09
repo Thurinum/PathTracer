@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 using System.Runtime.InteropServices;
-using Pathetic.Scene;
+using Pathetic.SceneGraph;
 
 namespace Pathetic.App.Components;
 

@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 using ImGuiNET;
-using Pathetic.Scene;
+using Pathetic.SceneGraph;
 
 namespace Pathetic.App.Components.GUI;
 

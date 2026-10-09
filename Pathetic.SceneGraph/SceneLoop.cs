@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using Pathetic.Renderer;
 
-namespace Pathetic.Scene;
+namespace Pathetic.SceneGraph;
 
 public class SceneLoop(RenderBackend backend)
 {

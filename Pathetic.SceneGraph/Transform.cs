@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace Pathetic.Scene;
+namespace Pathetic.SceneGraph;
 
 public class Transform : Component
 {

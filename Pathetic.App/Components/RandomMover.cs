@@ -1,5 +1,5 @@
 ﻿using System.Numerics;
-using Pathetic.Scene;
+using Pathetic.SceneGraph;
 
 namespace Pathetic.App.Components;
 

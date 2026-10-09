@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Pathetic.Renderer.Primitives;
 
-namespace Pathetic.Scene;
+namespace Pathetic.SceneGraph;
 
 public abstract class Component : IDestroyable
 {

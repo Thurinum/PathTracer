@@ -4,7 +4,7 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>Pathetic.Scene</RootNamespace>
+        <RootNamespace>Pathetic.SceneGraph</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

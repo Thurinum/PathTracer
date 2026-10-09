@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using Microsoft.Extensions.Options;
-using Pathetic.Scene;
 using Pathetic.Renderer;
+using Pathetic.SceneGraph;
 
 namespace Pathetic.App.Components.Camera;
 

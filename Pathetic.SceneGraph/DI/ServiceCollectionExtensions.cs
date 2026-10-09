@@ -1,11 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Pathetic.Renderer;
-using Pathetic.Renderer.Graph;
-using Pathetic.Renderer.Primitives;
-using Pathetic.Renderer.Resources;
-using Pathetic.Renderer.Shaders;
 
-namespace Pathetic.Scene.DI;
+namespace Pathetic.SceneGraph.DI;
 
 public static class ServiceCollectionExtensions
 {

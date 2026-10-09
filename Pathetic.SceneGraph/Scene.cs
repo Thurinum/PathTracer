@@ -1,4 +1,4 @@
-﻿namespace Pathetic.Scene;
+﻿namespace Pathetic.SceneGraph;
 
 public class Scene(ComponentFactory componentFactory)
 {

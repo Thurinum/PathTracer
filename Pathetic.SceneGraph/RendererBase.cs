@@ -1,6 +1,6 @@
 ﻿using Pathetic.Renderer.Primitives;
 
-namespace Pathetic.Scene;
+namespace Pathetic.SceneGraph;
 
 public abstract class RendererBase<T> : Component where T : unmanaged
 {
