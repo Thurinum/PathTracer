@@ -66,7 +66,6 @@ internal sealed class ResourceTable : IResourceAccessor, IDisposable
                 _reallocated.Add(entry.Spec.Name);
                 uint newCapacity = Math.Max(spec.Source.ElementCount, entry.ElementCapacity * 2);
                 entry.Resource = CreateDynamicBuffer(device, spec, entry, newCapacity);
-                entry.Version++;
                 didReallocate = true;
             }
             
@@ -93,7 +92,6 @@ internal sealed class ResourceTable : IResourceAccessor, IDisposable
                 }
                 
                 entry.Resource = CreateTexture(device, spec, width, height);
-                entry.Version++;
                 _resized.Add(entry.Spec.Name);
             }
         }

@@ -19,5 +19,4 @@ public sealed class RenderGraphResource
 
     public IDisposable? Owner { get; private set; }
     public uint ElementCapacity;
-    public uint Version;
 }

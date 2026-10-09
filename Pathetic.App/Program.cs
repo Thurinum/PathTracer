@@ -5,6 +5,7 @@ using Pathetic.App.Components;
 using Pathetic.App.Components.Camera;
 using Pathetic.App.RenderPasses;
 using Pathetic.Renderer.DI;
+using Pathetic.SceneGraph.DI;
 
 using var provider = ConfigureServices();
 var app = provider.GetRequiredService<App>();

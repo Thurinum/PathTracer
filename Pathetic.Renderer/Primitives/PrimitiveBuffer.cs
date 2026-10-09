@@ -19,7 +19,6 @@ public class PrimitiveBuffer<T> : IPrimitiveBuffer where T : unmanaged
     public int Capacity => _primitives.Length;
     public int Count { get; private set; }
     public uint Stride => (uint)Unsafe.SizeOf<T>();
-    public int CapacityVersion { get; private set; }
 
     public uint ElementCount => (uint)Count;
 
@@ -122,6 +121,5 @@ public class PrimitiveBuffer<T> : IPrimitiveBuffer where T : unmanaged
         Array.Resize(ref _versions, newSize);
         Array.Resize(ref _handleIdxToDenseIdx, newSize);
         Array.Resize(ref _denseIdxToHandleIdx, newSize);
-        CapacityVersion++;
     }
 }
