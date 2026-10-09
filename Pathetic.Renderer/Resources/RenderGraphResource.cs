@@ -13,7 +13,7 @@ public sealed class RenderGraphResource
         {
             Owner?.Dispose();
             field = value;
-            Owner = (IDisposable)value!;
+            Owner = value as IDisposable;
         }
     }
 
