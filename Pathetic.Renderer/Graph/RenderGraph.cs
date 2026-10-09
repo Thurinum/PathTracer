@@ -46,14 +46,10 @@ public sealed class RenderGraph(
             SceneRevision = sceneRevision.Value
         };
         
-        // TODO: Only update passes whose dependencies were reallocated
-        var reallocated = _resources.Reallocate(device, ctx.Cmd);
-        if (reallocated.Count > 0)
+        var reallocatedBindingNames = _resources.Reallocate(device, ctx.Cmd);
+        foreach (var entry in GetPassesWithBindings(reallocatedBindingNames))
         {
-            foreach (var entry in _passes)
-            {
-                stateFactory.UpdateResourceSet(entry.State!, device, _resources);
-            }
+            stateFactory.UpdateResourceSet(entry.State!, device, _resources);
         }
         
         foreach (var provider in resourceProviders)
@@ -78,9 +74,9 @@ public sealed class RenderGraph(
     public void Resize(GraphicsDevice device, uint width, uint height)
     {
         sceneRevision.Invalidate();
-        _resources.Resize(device, width, height);
+        var resizedTextureNames = _resources.Resize(device, width, height);
         
-        foreach (var entry in _passes)
+        foreach (var entry in GetPassesWithBindings(resizedTextureNames))
         {
             stateFactory.UpdateResourceSet(entry.State!, device, _resources);
         }
@@ -160,4 +156,14 @@ public sealed class RenderGraph(
             entry.State = stateFactory.Build(device, entry.Pass, _resources);
         }
     }
+
+    private IEnumerable<PassEntry> GetPassesWithBindings(IReadOnlySet<string> bindingNames)
+    {
+        if (bindingNames.Count > 0)
+        {
+            return _passes.Where(p => p.State!.Bindings.Any(b => bindingNames.Contains(b.Name)));
+        }
+
+        return [];
+    } 
 }

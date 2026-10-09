@@ -8,6 +8,10 @@ internal sealed class ResourceTable : IResourceAccessor, IDisposable
 {
     private readonly Dictionary<string, RenderGraphResource> _resources = [];
     private const int DynamicBufferDefaultElementCount = 256;
+    private readonly HashSet<string> _reallocated = [];
+    private readonly HashSet<string> _resized = [];
+    private uint _lastWidth;
+    private uint _lastHeight;
 
     public void Declare(IResourceSpec spec)
     {
@@ -36,11 +40,14 @@ internal sealed class ResourceTable : IResourceAccessor, IDisposable
                 _ => throw new UnreachableException("bruh")
             };
         }
+
+        _lastWidth = width;
+        _lastHeight = height;
     }
     
-    public IReadOnlyList<RenderGraphResource> Reallocate(GraphicsDevice device, CommandList cmd)
+    public IReadOnlySet<string> Reallocate(GraphicsDevice device, CommandList cmd)
     {
-        List<RenderGraphResource> reallocated = [];
+        _reallocated.Clear();
         
         foreach (RenderGraphResource entry in _resources.Values)
         {
@@ -51,12 +58,12 @@ internal sealed class ResourceTable : IResourceAccessor, IDisposable
             uint requiredCapacity = spec.Source.ElementCount;
             if (requiredCapacity > entry.ElementCapacity)
             {
-                if (reallocated.Count == 0)
+                if (_reallocated.Count == 0)
                 {
                     device.WaitForIdle();
                 }
                 
-                reallocated.Add(entry);
+                _reallocated.Add(entry.Spec.Name);
                 uint newCapacity = Math.Max(spec.Source.ElementCount, entry.ElementCapacity * 2);
                 entry.Resource = CreateDynamicBuffer(device, spec, entry, newCapacity);
                 entry.Version++;
@@ -66,21 +73,34 @@ internal sealed class ResourceTable : IResourceAccessor, IDisposable
             spec.Source.Upload(cmd, (DeviceBuffer)entry.Resource!, didReallocate);
         }
 
-        return reallocated;
+        return _reallocated;
     }
-
-    public void Resize(GraphicsDevice device, uint width, uint height)
+    
+    public IReadOnlySet<string> Resize(GraphicsDevice device, uint width, uint height)
     {
-        device.WaitForIdle();
+        _resized.Clear();
         
+        if (width == _lastWidth && height == _lastHeight)
+            return _resized;
+
         foreach (RenderGraphResource entry in _resources.Values)
         {
             if (entry.Spec is TextureSpec { SizePolicy: AutoSize } spec)
             {
+                if (_resized.Count == 0)
+                {
+                    device.WaitForIdle();
+                }
+                
                 entry.Resource = CreateTexture(device, spec, width, height);
                 entry.Version++;
+                _resized.Add(entry.Spec.Name);
             }
         }
+
+        _lastWidth = width;
+        _lastHeight = height;
+        return _resized;
     }
     
     public BindableResource Get(string name)
