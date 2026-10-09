@@ -22,7 +22,7 @@ public class CameraProvider(SceneRevision revision) : IResourceProvider
 
     public IEnumerable<IResourceSpec> Resources { get; } =
     [
-        new UniformBufferSpec("camera", (uint)Unsafe.SizeOf<CameraData>())    
+        UniformBufferSpec.Of<CameraData>("camera")    
     ];
     
     public void Update(RenderContext ctx)

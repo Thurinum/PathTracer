@@ -17,7 +17,7 @@ public sealed class TemporalAccumulationPass : RenderPass
             TextureUsage.Sampled | TextureUsage.Storage, new AutoSize()),
         new TextureSpec("accumImage", PixelFormat.R32_G32_B32_A32_Float,
             TextureUsage.Sampled | TextureUsage.Storage, new AutoSize()),
-        new UniformBufferSpec("accumParams", 16),
+        UniformBufferSpec.Of<Params>("accumParams"),
     ];
     private readonly ResourceRef[] _inputs =
     [

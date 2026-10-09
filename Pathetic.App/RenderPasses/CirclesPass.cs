@@ -17,7 +17,7 @@ public sealed class CirclesPass(PrimitiveRegistry primitives) : RenderPass
     private readonly IResourceSpec[] _outputs =
     [
         new TextureSpec("circles", PixelFormat.R32_G32_B32_A32_Float, TextureUsage.Sampled | TextureUsage.Storage, new AutoSize()),
-        new UniformBufferSpec("circlesParams", 16),
+        UniformBufferSpec.Of<Params>("circlesParams"),
     ];
     private readonly ResourceRef[] _inputs =
     [

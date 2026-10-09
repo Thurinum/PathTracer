@@ -24,7 +24,7 @@ public sealed class PathTracerPass(IOptions<EngineOptions> options, PrimitiveReg
     private readonly IResourceSpec[] _outputs =
     [
         new TextureSpec("pathTracerColor", PixelFormat.R32_G32_B32_A32_Float, TextureUsage.Sampled | TextureUsage.Storage, new AutoSize()),
-        new UniformBufferSpec("pathTracerParams", 32),
+        UniformBufferSpec.Of<Params>("pathTracerParams"),
     ];
     private readonly ResourceRef[] _inputs =
     [
